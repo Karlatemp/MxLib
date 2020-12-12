@@ -1,0 +1,31 @@
+rootProject.name = 'MXLib'
+
+def imports(String... projects) {
+    for (String proj : projects) {
+        def name = ':' + proj.replace('.', '-')
+        include(name)
+        project(name).projectDir = new File(rootProject.projectDir, proj)
+    }
+}
+
+imports(
+        'mxlib.annotation',
+        'mxlib.api',
+        'mxlib.api.kotlin',
+        'mxlib.common',
+        'mxlib.common.kotlin',
+        'mxlib.command',
+        'mxlib.command.kotlin',
+        'mxlib.nbt',
+        'mxlib.logger',
+        'mxlib.network',
+        'mxlib.spigot',
+        'mxlib.spigot.kotlin',
+        'mxlib.spigot.impl',
+        'mxlib.selenium',
+        // 'mxlib.legacy',
+)
+
+include(':mxlib.z.shadow')
+// include(':mirai.console.terminal')
+

@@ -1,0 +1,4 @@
+{
+  "command.no.argument": "Please type \"/{0}{1} -?\" for help",
+  "command.not.found": "Unknown command: {1} in {0}"
+}

@@ -1,0 +1,83 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.20' apply false
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.20' apply false
+    id 'com.github.johnrengelman.shadow' version '6.1.0' apply false
+
+}
+
+//noinspection GroovyAssignabilityCheck
+allprojects {
+
+    group 'io.github.karlatemp'
+    version '3.0-dev'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        //noinspection GroovyAssignabilityCheck
+        maven { url = 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+    }
+
+    //noinspection GroovyAssignabilityCheck
+    afterEvaluate {
+        if (project.name == 'mxlib.z.shadow') return
+        dependencies {
+            testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+            testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
+            if (project.name.endsWith("-kotlin")) {
+                def ktimp = { f ->
+                    compileOnly f
+                    testCompile f
+                }
+                ktimp "org.jetbrains.kotlin:kotlin-stdlib"
+                ktimp "org.jetbrains.kotlin:kotlin-serialization"
+                // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-serialization-json-jvm
+                ktimp group: 'org.jetbrains.kotlinx', name: 'kotlinx-serialization-json-jvm', version: '1.0.1'
+
+                ktimp "org.jetbrains.kotlin:kotlin-reflect"
+                ktimp "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1"
+                testCompile "org.jetbrains.kotlin:kotlin-test-junit5"
+//                exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core-common")
+//                exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm")
+//                exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core-metadata")
+            }
+        }
+
+        test {
+            useJUnitPlatform()
+        }
+
+        compileJava {
+            sourceCompatibility = JavaVersion.VERSION_1_8
+            targetCompatibility = JavaVersion.VERSION_1_8
+        }
+
+        compileTestJava {
+            sourceCompatibility = JavaVersion.VERSION_13
+            targetCompatibility = JavaVersion.VERSION_13
+        }
+
+        try {
+
+            compileKotlin {
+                kotlinOptions {
+                    jvmTarget = '1.8'
+                    freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn',
+                                         '-Xjvm-default=enable']
+                }
+            }
+            compileTestKotlin {
+                kotlinOptions {
+                    jvmTarget = '1.8'
+                    freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn',
+                                         '-Xjvm-default=enable']
+                }
+            }
+
+        } catch (Throwable ignore) {
+        }
+    }
+}
+

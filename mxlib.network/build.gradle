@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation project(':mxlib-annotation')
+    implementation project(':mxlib-api')
+    implementation project(':mxlib-common')
+    implementation project(':mxlib-nbt')
+
+    compile 'io.netty:netty-all:4.1.50.Final'
+
+}

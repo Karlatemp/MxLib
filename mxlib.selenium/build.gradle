@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation project(':mxlib-annotation')
+    implementation project(':mxlib-api')
+    implementation project(':mxlib-common')
+
+    // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+
+    compile 'org.codehaus.plexus:plexus-archiver:2.2'
+}
+

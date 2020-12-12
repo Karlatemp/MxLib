@@ -1,0 +1,113 @@
+import java.nio.file.Files
+
+plugins {
+    id 'com.jfrog.bintray' version '1.8.5'
+    id("maven-publish")
+}
+
+rootProject.subprojects.forEach { proj ->
+    if (proj != project) {
+        proj.tasks.create("sourcesJar", Jar.class) { tsk ->
+            tsk.dependsOn("classes")
+            tsk.classifier = 'sources'
+            tsk.from proj.sourceSets.main.allSource
+        }
+    }
+}
+
+def root = rootProject
+
+task collectJars() {
+    def tasks = new ArrayList<Jar>()
+    rootProject.subprojects.forEach { proj ->
+        try {
+            def task = proj.tasks.getByName("jar")
+            if (task instanceof Jar) {
+                tasks.add(task)
+            }
+        } catch (Throwable ignore) {
+        }
+        try {
+            def task = proj.tasks.getByName("sourcesJar")
+            if (task instanceof Jar) {
+                tasks.add(task)
+            }
+        } catch (Throwable ignore) {
+        }
+        try {
+            def task = proj.tasks.getByName("shadowJar")
+            if (task instanceof Jar) {
+                tasks.add(task)
+            }
+        } catch (Throwable ignore) {
+        }
+    }
+    dependsOn(tasks)
+    //noinspection GroovyAssignabilityCheck
+    doLast {
+        def target = new File(rootProject.buildDir, "clibs/" + rootProject.version)
+        target.mkdirs()
+        tasks.forEach { Jar jarTask ->
+            def tfile = jarTask.archiveFile.get().asFile
+            def ttf = new File(target, tfile.name)
+            ttf.delete()
+            Files.copy(tfile.toPath(), ttf.toPath())
+        }
+    }
+}
+
+def allPublishs = new ArrayList<String>()
+def zshadowProj = project
+
+publishing {
+    publications { container ->
+        root.subprojects.forEach { proj ->
+            if (proj != zshadowProj) {
+                def ppid = "publish_${proj.name}".replace(".", "_")
+                allPublishs.add(ppid)
+                register(ppid, MavenPublication.class) { publication ->
+                    publication.artifactId(proj.name)
+                    //noinspection GroovyAssignabilityCheck
+                    publication.from(proj.components.java)
+
+                    def sources = proj.tasks.findByName('sourcesJar')
+                    if (sources instanceof Jar) {
+                        publication.artifact sources
+                    }
+
+                    publication.pom {
+                        name = 'MxLib - ' + proj.name
+                        description = 'MxLib - ' + proj.name
+                        url = 'https://github.com/Karlatemp/MxLib'
+                        licenses {
+                            license {
+                                name = 'MIT License'
+                                url = 'https://spdx.org/licenses/MIT.html'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    publications = allPublishs
+
+    user = project.findProperty("bintray.user") ?: System.getenv("USERNAME")
+    key = project.findProperty('bintray.key') ?: System.getenv("TOKEN")
+
+
+    pkg {
+        repo = 'misc'
+        name = rootProject.name
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/Karlatemp/MxLib.git'
+        version {
+            name = project.version
+            desc = project.version
+            released = new Date()
+        }
+    }
+}

@@ -1,0 +1,111 @@
+package io.github.karlatemp.mxlib.selenium;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import io.github.karlatemp.mxlib.utils.Toolkit;
+import org.apache.http.client.methods.HttpGet;
+import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
+import org.codehaus.plexus.logging.console.ConsoleLoggerManager;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.zip.ZipFile;
+
+class FirefoxKit {
+    static final String API = "https://api.github.com/repos/mozilla/geckodriver/releases/latest";
+    static final File firefox_cache = new File(MxSelenium.data, "firefox_driver.json");
+
+    static void fetch() throws IOException {
+        if (firefox_cache.isFile() && System.currentTimeMillis() - firefox_cache.lastModified() < 1000L * 60 * 60 * 24 * 7) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(firefox_cache), StandardCharsets.UTF_8)) {
+                JsonParser.parseReader(reader);
+                return;
+            } catch (Throwable ignored) {
+            }
+        }
+        try (OutputStream fos = new BufferedOutputStream(new FileOutputStream(firefox_cache))) {
+            MxSelenium.client.execute(new HttpGet(API)).getEntity()
+                    .writeTo(fos);
+        }
+    }
+
+    static File parse() throws IOException {
+        JsonObject obj;
+        try (Reader reader = new InputStreamReader(new FileInputStream(firefox_cache), StandardCharsets.UTF_8)) {
+            obj = JsonParser.parseReader(reader).getAsJsonObject();
+        }
+        String ver = obj.getAsJsonPrimitive("name").getAsString();
+        JsonArray assetsArray = obj.getAsJsonArray("assets");
+        Map<String, String> assets = new HashMap<>();
+        for (JsonElement asset : assetsArray) {
+            JsonObject assetAsJsonObject = asset.getAsJsonObject();
+            assets.put(
+                    assetAsJsonObject.getAsJsonPrimitive("name").getAsString(),
+                    assetAsJsonObject.getAsJsonPrimitive("browser_download_url").getAsString()
+            );
+        }
+        String except = null;
+        String os = System.getProperty("os.name");
+        if (os.toLowerCase().startsWith("windows")) {
+            except = "-win32.zip";
+        } else if (os.toLowerCase().startsWith("mac")) {
+            except = "macos.tar.gz";
+        } else if (os.startsWith("Linux")) {
+            if (System.getProperty("os.arch").contains("64")) {
+                except = "linux64.tar.gz";
+            } else {
+                except = "linux32.tar.gz";
+            }
+
+        }
+        if (except == null) {
+            throw new UnsupportedOperationException("Unsupported platform: " + except);
+        }
+        final String exc = except;
+        Map.Entry<String, String> entry = assets.entrySet().stream().filter(it ->
+                it.getKey().endsWith(exc)
+        ).findFirst().get();
+        File file = new File(MxSelenium.data, entry.getKey());
+        if (!file.isFile()) {
+            try (OutputStream fos = new BufferedOutputStream(new FileOutputStream(file))) {
+                MxSelenium.client.execute(new HttpGet(entry.getValue())).getEntity()
+                        .writeTo(fos);
+            }
+        }
+        if (except.endsWith(".zip")) { // Windows NT
+            File res = new File(MxSelenium.data, "geckodriver-v" + ver + ".exe");
+            if (!res.isFile()) {
+                try (ZipFile zip = new ZipFile(file)) {
+                    try (OutputStream fos = new BufferedOutputStream(new FileOutputStream(res))) {
+                        Toolkit.IO.writeTo(zip.getInputStream(zip.getEntry("geckodriver.exe")), fos);
+                    }
+                }
+            }
+            return res;
+        } else { // Tar.GZ
+            File res = new File(MxSelenium.data, "geckodriver-v" + ver);
+            if (res.isFile()) {
+                return res;
+            }
+            final TarGZipUnArchiver ua = new TarGZipUnArchiver();
+            // Logging - as @Akom noted, logging is mandatory in newer versions, so you can use a code like this to configure it:
+            ConsoleLoggerManager manager = new ConsoleLoggerManager();
+            manager.initialize();
+            ua.enableLogging(manager.getLoggerForComponent("bla"));
+            // -- end of logging part
+            ua.setSourceFile(file);
+            File destDir = new File(MxSelenium.data, "tmp-dest");
+            destDir.mkdirs();
+            ua.setDestDirectory(destDir);
+            ua.extract();
+            File f = destDir.listFiles()[0];
+            f.renameTo(res);
+            res.setExecutable(true);
+            return res;
+        }
+    }
+}

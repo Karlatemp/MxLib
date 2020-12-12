@@ -1,0 +1,16 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    //noinspection GroovyAssignabilityCheck
+    maven { url = "https://libraries.minecraft.net" }
+}
+
+dependencies {
+    implementation project(':mxlib-annotation')
+    implementation project(':mxlib-api')
+    implementation project(':mxlib-common')
+
+    compile 'com.mojang:brigadier:1.0.17'
+}
