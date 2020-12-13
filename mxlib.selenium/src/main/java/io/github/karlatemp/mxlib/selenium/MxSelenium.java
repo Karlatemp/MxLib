@@ -12,17 +12,18 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.time.Duration;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.zip.ZipFile;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
@@ -107,7 +108,7 @@ public class MxSelenium {
     }
 
     private static boolean initialized;
-    private static Supplier<RemoteWebDriver> driverSupplier;
+    private static Function<String, RemoteWebDriver> driverSupplier;
 
     private static void initialize() throws Exception {
         if (initialized) return;
@@ -149,15 +150,20 @@ public class MxSelenium {
                         }
                     }
                     System.setProperty("webdriver.chrome.driver", chromedriverExecutable.getPath());
-                    driverSupplier = ChromeDriver::new;
+                    driverSupplier = agent -> {
+                        if (agent == null) return new ChromeDriver();
+                        ChromeOptions options = new ChromeOptions();
+                        options.addArguments("user-agent=" + agent);
+                        return new ChromeDriver(options);
+                    };
                     // endregion
                 } else if (browser.toLowerCase().startsWith("firefox")) {
                     FirefoxKit.fetch();
                     File provider = FirefoxKit.parse();
                     System.setProperty("webdriver.gecko.driver", provider.getPath());
-                    driverSupplier = FirefoxDriver::new;
+                    driverSupplier = firefox();
                 } else {
-                    driverSupplier = () -> {
+                    driverSupplier = agent -> {
                         throw new UnsupportedOperationException("Unsupported browser: " + browser + ", Only chrome/firefox supportted");
                     };
                 }
@@ -168,9 +174,9 @@ public class MxSelenium {
                         FirefoxKit.fetch();
                         File provider = FirefoxKit.parse();
                         System.setProperty("webdriver.gecko.driver", provider.getPath());
-                        driverSupplier = FirefoxDriver::new;
+                        driverSupplier = firefox();
                     } else {
-                        driverSupplier = () -> {
+                        driverSupplier = agent -> {
                             throw new UnsupportedOperationException("Unsupported Platform: " + os + ", " + type + ", Only FireFox browser supportted now.");
                         };
                     }
@@ -178,20 +184,33 @@ public class MxSelenium {
                 }
             }
             if (driverSupplier == null) {
-                driverSupplier = () -> {
+                driverSupplier = agent -> {
                     throw new UnsupportedOperationException("Unsupported Platform: " + os);
                 };
             }
         }
     }
 
+    private static Function<String, RemoteWebDriver> firefox() {
+        return agent -> {
+            if (agent == null) return new FirefoxDriver();
+            FirefoxOptions options = new FirefoxOptions();
+            options.addPreference("general.useragent.override", agent);
+            return new FirefoxDriver(options);
+        };
+    }
+
     public static RemoteWebDriver newDriver() {
+        return newDriver(null);
+    }
+
+    public static RemoteWebDriver newDriver(String useragent) {
         try {
             initialize();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return driverSupplier.get();
+        return driverSupplier.apply(useragent);
     }
 
     public static void main(String[] args) throws Throwable {
