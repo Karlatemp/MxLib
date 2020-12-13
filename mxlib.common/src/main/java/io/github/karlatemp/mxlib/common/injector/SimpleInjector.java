@@ -75,6 +75,7 @@ public class SimpleInjector implements IInjector, ContextBean {
                 inject(field, injected.getType(), injected.isNullable(), injected.getName(), injected, null);
             } else {
                 Inject inject = field.getDeclaredAnnotation(Inject.class);
+                if (inject == null) continue;
                 String name = inject.name();
                 if (name.equals(Inject.NAME_UNSET)) name = null;
                 UNSAFE.ensureClassInitialized(klass);
@@ -127,6 +128,7 @@ public class SimpleInjector implements IInjector, ContextBean {
                 injectedFlag |= inject(field, injected.getType(), injected.isNullable(), injected.getName(), injected, obj);
             } else {
                 Inject inject = field.getDeclaredAnnotation(Inject.class);
+                if (inject == null) continue;
                 String name = inject.name();
                 if (name.equals(Inject.NAME_UNSET)) name = null;
                 Class<?> value = inject.value();
