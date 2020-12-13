@@ -11,5 +11,6 @@ dependencies {
     compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
 
     compile 'org.codehaus.plexus:plexus-archiver:2.2'
+    compile 'org.apache.httpcomponents:httpclient:4.3.5'
 }
 

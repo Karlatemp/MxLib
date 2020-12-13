@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation project(':mxlib-annotation')
+    implementation project(':mxlib-api')
+    implementation project(':mxlib-common')
+
+    def aetherVersion = '1.1.0'
+    def mavenVersion = '3.3.9'
+
+    compile group: 'org.eclipse.aether', name: 'aether-api', version: aetherVersion
+    compile group: 'org.eclipse.aether', name: 'aether-spi', version: aetherVersion
+    compile group: 'org.eclipse.aether', name: 'aether-impl', version: aetherVersion
+    compile group: 'org.eclipse.aether', name: 'aether-connector-basic', version: aetherVersion
+    compile group: 'org.eclipse.aether', name: 'aether-transport-file', version: aetherVersion
+    compile group: 'org.eclipse.aether', name: 'aether-transport-http', version: aetherVersion
+    compile group: 'org.apache.maven', name: 'maven-aether-provider', version: mavenVersion
+
+}

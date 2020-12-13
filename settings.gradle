@@ -13,6 +13,7 @@ imports(
         'mxlib.api',
         'mxlib.api.kotlin',
         'mxlib.common',
+        'mxlib.common.maven',
         'mxlib.common.kotlin',
         'mxlib.command',
         'mxlib.command.kotlin',
