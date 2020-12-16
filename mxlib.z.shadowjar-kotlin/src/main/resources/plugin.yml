@@ -1,0 +1,5 @@
+name: MxLib-KotlinRuntime
+version: ${version}
+main: kotlin.bukkit.runasbk.RunAsBukkit
+load: STARTUP
+

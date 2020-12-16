@@ -2,6 +2,11 @@ name: MxLib
 author: Karlatemp
 main: io.github.karlatemp.mxlib.spigot.impl.MxLibSpigotPlugin
 version: 3.0
+load: STARTUP
 
 commands:
   mxlib: { }
+
+softdepend:
+  - 'MxLib-KotlinRuntime'
+

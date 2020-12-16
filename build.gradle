@@ -28,8 +28,12 @@ allprojects {
             testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
             if (project.name.endsWith("-kotlin")) {
                 def ktimp = { f ->
-                    compileOnly f
-                    testCompile f
+                    if (project.name == "mxlib.z.shadowjar-kotlin") {
+                        compile f
+                    } else {
+                        compileOnly f
+                        testCompile f
+                    }
                 }
                 ktimp "org.jetbrains.kotlin:kotlin-stdlib"
                 ktimp "org.jetbrains.kotlin:kotlin-serialization"

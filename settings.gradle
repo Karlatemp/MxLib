@@ -28,5 +28,10 @@ imports(
 )
 
 include(':mxlib.z.shadow')
+include(':mxlib.z.shadowjar-kotlin')
+
+
+
+
 // include(':mirai.console.terminal')
 
