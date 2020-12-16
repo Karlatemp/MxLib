@@ -8,4 +8,5 @@ public class Notifications {
     // PluginClassLoader
     public static final List<Consumer<Object>> PluginLoadEvent = new ArrayList<>();
     public static final List<Consumer<Object>> PluginUnLoadEvent = new ArrayList<>();
+    public static final List<Runnable> MxLibUnloadHooks = new ArrayList<>();
 }

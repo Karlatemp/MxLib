@@ -47,8 +47,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MxLibSpigotPlugin extends JavaPlugin {
-    @SuppressWarnings("FieldCanBeLocal")
-    private static Handler SYS;
     private static final Map<Path, String> MAPPING = new HashMap<>();
     private static final Map<JavaPlugin, IBeanManager> BEAN_MANAGER_MAP = new HashMap<>();
     private static final Lock BEAN_MANAGER_MAP_LOCK = new ReentrantLock();
@@ -106,14 +104,16 @@ public class MxLibSpigotPlugin extends JavaPlugin {
         MxLib.setLoggerFactory(name -> new AwesomeLogger.Awesome(name, printer, renderX));
         Logger root = JdkLoggerUtils.ROOT.get();
         Handler[] handlers = root.getHandlers();
+        MJdkLoggerHandler mJdkLoggerHandler = new MJdkLoggerHandler(toplevel);
+        Notifications.MxLibUnloadHooks.add(() -> root.removeHandler(mJdkLoggerHandler));
         for (Handler h : handlers) {
             if (h instanceof ConsoleHandler) {
                 root.removeHandler(h);
-                SYS = h;
+                Notifications.MxLibUnloadHooks.add(() -> root.addHandler(h));
                 break;
             }
         }
-        root.addHandler(new MJdkLoggerHandler(toplevel));
+        root.addHandler(mJdkLoggerHandler);
         MAPPING.put(bm.getBeanNonNull(ClassLocator.class).findLocate(Bukkit.class), Bukkit.getVersion());
         bm.register(TitleApi.class, new TitleApiImpl());
         bm.register(SystemTranslator.class, new BkSysTranslator());
@@ -142,9 +142,11 @@ public class MxLibSpigotPlugin extends JavaPlugin {
         BeanManagers.registerAll(getFile().toPath(), getClassLoader(), MxLib.getBeanManager());
         {
             JavaPluginLoader loader = (JavaPluginLoader) getPluginLoader();
+            List<?> loaders = PluginClassLoaderAccess.getLoaders(loader);
             PluginClassLoaderAccess.setLoaders(loader, new PluginLoadNotifyLoader(
-                    PluginClassLoaderAccess.getLoaders(loader)
+                    loaders
             ));
+            Notifications.MxLibUnloadHooks.add(() -> PluginClassLoaderAccess.setLoaders(loader, loaders));
         }
         Notifications.PluginLoadEvent.add(loader -> {
             JavaPlugin jp = PluginClassLoaderAccess.getPlugin(loader);
@@ -173,7 +175,6 @@ public class MxLibSpigotPlugin extends JavaPlugin {
                 BEAN_MANAGER_MAP_LOCK.unlock();
             }
         });
-        getLogger().info(MAPPING.toString());
     }
 
     private static IBeanManager newScope(JavaPlugin jp) {
@@ -205,5 +206,13 @@ public class MxLibSpigotPlugin extends JavaPlugin {
                 .ofFile(getFile())
                 .ofClass(RCmd.class)
                 .end(BukkitCommandExecutor::new));
+    }
+
+    @Override
+    public void onDisable() {
+        Notifications.MxLibUnloadHooks.removeIf(it -> {
+            it.run();
+            return true;
+        });
     }
 }
