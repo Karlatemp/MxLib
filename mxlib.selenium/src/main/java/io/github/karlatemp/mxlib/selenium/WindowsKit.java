@@ -37,6 +37,8 @@ class WindowsKit {
     }
 
     static String queryBrowserUsing() throws IOException {
+        String override = System.getProperty("mxlib.selenium.browser"); // DEBUG ONLY
+        if (override != null) return override;
         return WindowsKit.parseRegResult(commandProcessResult(
                 "reg", "query", "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\Shell\\Associations\\URLAssociations\\https\\UserChoice", "/v", "ProgId"
         )).values().iterator().next().get("ProgId");

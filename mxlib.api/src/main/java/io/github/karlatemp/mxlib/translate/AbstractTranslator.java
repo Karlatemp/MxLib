@@ -47,6 +47,14 @@ public abstract class AbstractTranslator implements Translator {
         }
     }
 
+    public static final class Empty extends AbstractTranslator {
+        public static final Empty INSTANCE = new Empty();
+        @Override
+        protected @Nullable FormatTemplate findTranslateTemplate(@NotNull String key) {
+            return null;
+        }
+    }
+
     protected Translator parent;
 
     public AbstractTranslator() {

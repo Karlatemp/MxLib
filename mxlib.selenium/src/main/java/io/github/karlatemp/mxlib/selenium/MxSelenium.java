@@ -7,10 +7,7 @@ import io.github.karlatemp.mxlib.utils.Toolkit;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -23,7 +20,8 @@ import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.zip.ZipFile;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
@@ -34,6 +32,11 @@ public class MxSelenium {
     static final File JAVA_EXECUTABLE;
     static final File data = new File(MxLib.getDataStorage(), "selenium");
     static final HttpClient client = HttpClientBuilder.create().build();
+    static boolean IS_SUPPORT;
+
+    public static boolean isSupported() {
+        return IS_SUPPORT;
+    }
 
     static {
         {
@@ -45,16 +48,17 @@ public class MxSelenium {
                 je = exec_windows;
             } else if (exec.exists() && exec.canExecute()) {
                 je = exec;
-            }
-            String jhome = System.getProperty("java.home");
-            exec_windows = new File(jhome, "bin/java.exe");
-            exec = new File(jhome, "bin/java");
-            if (exec_windows.isFile()) {
-                je = exec_windows;
-            } else if (exec.exists() && exec.canExecute()) {
-                je = exec;
             } else {
-                je = null;
+                String jhome = System.getProperty("java.home");
+                exec_windows = new File(jhome, "bin/java.exe");
+                exec = new File(jhome, "bin/java");
+                if (exec_windows.isFile()) {
+                    je = exec_windows;
+                } else if (exec.exists() && exec.canExecute()) {
+                    je = exec;
+                } else {
+                    je = null;
+                }
             }
             JAVA_EXECUTABLE = je;
         }
@@ -67,7 +71,6 @@ public class MxSelenium {
                         throw new UnsupportedOperationException("Java Executable not found.");
                     }
                     try {
-                        System.out.println(JAVA_EXECUTABLE);
                         String result = commandProcessResult(true, JAVA_EXECUTABLE.getPath(), "-XshowSettings:properties", "-version");
                         Optional<String> fileEncoding = Splitter.on('\n').splitToList(result).stream()
                                 .filter(it -> it.trim().startsWith("file.encoding"))
@@ -108,7 +111,7 @@ public class MxSelenium {
     }
 
     private static boolean initialized;
-    private static Function<String, RemoteWebDriver> driverSupplier;
+    private static BiFunction<String, Consumer<Capabilities>, RemoteWebDriver> driverSupplier;
 
     private static void initialize() throws Exception {
         if (initialized) return;
@@ -150,22 +153,25 @@ public class MxSelenium {
                         }
                     }
                     System.setProperty("webdriver.chrome.driver", chromedriverExecutable.getPath());
-                    driverSupplier = agent -> {
-                        if (agent == null) return new ChromeDriver();
+                    driverSupplier = (agent, c) -> {
                         ChromeOptions options = new ChromeOptions();
-                        options.addArguments("user-agent=" + agent);
+                        if (agent != null) options.addArguments("user-agent=" + agent);
+                        if (c != null) c.accept(options);
                         return new ChromeDriver(options);
                     };
+                    IS_SUPPORT = true;
                     // endregion
                 } else if (browser.toLowerCase().startsWith("firefox")) {
                     FirefoxKit.fetch();
                     File provider = FirefoxKit.parse();
                     System.setProperty("webdriver.gecko.driver", provider.getPath());
                     driverSupplier = firefox();
+                    IS_SUPPORT = true;
                 } else {
-                    driverSupplier = agent -> {
+                    driverSupplier = (agent, c) -> {
                         throw new UnsupportedOperationException("Unsupported browser: " + browser + ", Only chrome/firefox supportted");
                     };
+                    IS_SUPPORT = false;
                 }
             } else if (os.equals("Linux")) {
                 try {
@@ -175,27 +181,30 @@ public class MxSelenium {
                         File provider = FirefoxKit.parse();
                         System.setProperty("webdriver.gecko.driver", provider.getPath());
                         driverSupplier = firefox();
+                        IS_SUPPORT = true;
                     } else {
-                        driverSupplier = agent -> {
+                        driverSupplier = (agent, c) -> {
                             throw new UnsupportedOperationException("Unsupported Platform: " + os + ", " + type + ", Only FireFox browser supportted now.");
                         };
+                        IS_SUPPORT = false;
                     }
                 } catch (Throwable ignored) {
                 }
             }
             if (driverSupplier == null) {
-                driverSupplier = agent -> {
+                driverSupplier = (agent, c) -> {
                     throw new UnsupportedOperationException("Unsupported Platform: " + os);
                 };
+                IS_SUPPORT = false;
             }
         }
     }
 
-    private static Function<String, RemoteWebDriver> firefox() {
-        return agent -> {
-            if (agent == null) return new FirefoxDriver();
+    private static BiFunction<String, Consumer<Capabilities>, RemoteWebDriver> firefox() {
+        return (agent, c) -> {
             FirefoxOptions options = new FirefoxOptions();
-            options.addPreference("general.useragent.override", agent);
+            if (agent != null) options.addPreference("general.useragent.override", agent);
+            if (c != null) c.accept(options);
             return new FirefoxDriver(options);
         };
     }
@@ -205,12 +214,16 @@ public class MxSelenium {
     }
 
     public static RemoteWebDriver newDriver(String useragent) {
+        return newDriver(useragent, null);
+    }
+
+    public static RemoteWebDriver newDriver(String useragent, Consumer<Capabilities> consumer) {
         try {
             initialize();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return driverSupplier.apply(useragent);
+        return driverSupplier.apply(useragent, consumer);
     }
 
     public static void main(String[] args) throws Throwable {

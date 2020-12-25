@@ -8,7 +8,7 @@ dependencies {
     implementation project(':mxlib-common')
 
     // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
-    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.0.0-alpha-7'
 
     compile 'org.codehaus.plexus:plexus-archiver:2.2'
     compile 'org.apache.httpcomponents:httpclient:4.3.5'

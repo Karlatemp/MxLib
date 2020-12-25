@@ -10,7 +10,7 @@ plugins {
 allprojects {
 
     group 'io.github.karlatemp'
-    version '3.0-dev'
+    version '3.0-dev-1'
 
     repositories {
         mavenLocal()

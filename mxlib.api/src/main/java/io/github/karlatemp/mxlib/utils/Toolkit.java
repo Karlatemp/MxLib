@@ -34,7 +34,7 @@ public class Toolkit {
      * @since 2.11
      */
     public static <K, V> Map.Entry<K, V> entry(K k, V v) {
-        return new Map.Entry<K,V>() {
+        return new Map.Entry<K, V>() {
             V vx = v;
 
             @Override
