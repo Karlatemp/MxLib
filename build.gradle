@@ -9,8 +9,8 @@ plugins {
 //noinspection GroovyAssignabilityCheck
 allprojects {
 
-    group 'io.github.karlatemp'
-    version '3.0-dev-1'
+    group 'io.github.karlatemp.mxlib'
+    version '3.0-dev-2'
 
     repositories {
         mavenLocal()
