@@ -5,7 +5,6 @@ import io.github.karlatemp.mxlib.MxLib;
 import io.github.karlatemp.mxlib.common.utils.IOUtils;
 import io.github.karlatemp.mxlib.utils.Toolkit;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -18,6 +17,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -113,7 +113,23 @@ public class MxSelenium {
     private static boolean initialized;
     private static BiFunction<String, Consumer<Capabilities>, RemoteWebDriver> driverSupplier;
 
-    private static void initialize() throws Exception {
+    public static void initialize() throws Exception {
+        if (initialized) return;
+        synchronized (MxSelenium.class) {
+            if (initialized) return;
+            try {
+                initialize0();
+            } catch (Throwable throwable) {
+                driverSupplier = (a, b) -> {
+                    throw new RuntimeException(throwable);
+                };
+                IS_SUPPORT = false;
+                throw throwable;
+            }
+        }
+    }
+
+    private static void initialize0() throws Exception {
         if (initialized) return;
         synchronized (MxSelenium.class) {
             if (initialized) return;
@@ -132,26 +148,39 @@ public class MxSelenium {
                         }
                     }
                     String result = commandProcessResult("cmd", "/c", bat.getPath());
-                    Map<String, Map<String, String>> chromever = WindowsKit.parseRegResult(result);
-
-                    Map<String, String> next = chromever.values().iterator().next();
-                    String ver = next.getOrDefault("opv", next.get("pv"));
-
-                    File chromedriverExecutable = new File(data, "chromedriver-" + ver + ".exe");
-
-                    if (!chromedriverExecutable.isFile()) {
-                        String url = "https://chromedriver.storage.googleapis.com/" + ver + "/chromedriver_win32.zip";
-                        File chromedriverZip = new File(data, "chromedriver-" + ver + ".zip");
-                        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(chromedriverZip))) {
-                            client.execute(new HttpGet(url)).getEntity().writeTo(out);
+                    String chromeverx = System.getProperty("mxlib.selenium.chrome.version");
+                    if (chromeverx == null) {
+                        Map<String, Map<String, String>> chromever = WindowsKit.parseRegResult(result);
+                        Iterator<Map<String, String>> iterator = chromever.values().iterator();
+                        if (!iterator.hasNext()) {
+                            throw new UnsupportedOperationException("Unable to confirm the version of Chrome. " +
+                                    "Please set chrome version with `-Dmxlib.selenium.chrome.version=VERSION`. " +
+                                    "And report to https://github.com/Karlatemp/MxLib");
                         }
-                        try (ZipFile zip = new ZipFile(chromedriverZip)) {
-                            try (InputStream inp = zip.getInputStream(zip.getEntry("chromedriver.exe"));
-                                 OutputStream out = new BufferedOutputStream(new FileOutputStream(chromedriverExecutable))) {
-                                Toolkit.IO.writeTo(inp, out);
-                            }
+                        Map<String, String> next = iterator.next();
+                        String ver = next.getOrDefault("opv", next.get("pv"));
+                        if (ver == null) {
+                            throw new UnsupportedOperationException("Unable to confirm the version of Chrome. " +
+                                    "Please set chrome version with `-Dmxlib.selenium.chrome.version=VERSION`. " +
+                                    "And report to https://github.com/Karlatemp/MxLib\n" +
+                                    result);
                         }
+                        chromeverx = ver;
                     }
+
+                    File chromedriverExecutable = NetKit.download(
+                            new File(data, "chromedriver-" + chromeverx + ".exe"),
+                            "https://chromedriver.storage.googleapis.com/" + chromeverx + "/chromedriver_win32.zip",
+                            "chromedriver-" + chromeverx + ".zip",
+                            (tar, zipFile) -> {
+                                try (ZipFile zip = new ZipFile(zipFile)) {
+                                    try (InputStream inp = zip.getInputStream(zip.getEntry("chromedriver.exe"));
+                                         OutputStream out = new BufferedOutputStream(new FileOutputStream(tar))) {
+                                        Toolkit.IO.writeTo(inp, out);
+                                    }
+                                }
+                            }
+                    );
                     System.setProperty("webdriver.chrome.driver", chromedriverExecutable.getPath());
                     driverSupplier = (agent, c) -> {
                         ChromeOptions options = new ChromeOptions();
@@ -188,7 +217,8 @@ public class MxSelenium {
                         };
                         IS_SUPPORT = false;
                     }
-                } catch (Throwable ignored) {
+                } catch (Throwable error) {
+                    throw new UnsupportedOperationException("Unsupported Platform: " + os, error);
                 }
             }
             if (driverSupplier == null) {
@@ -196,6 +226,9 @@ public class MxSelenium {
                     throw new UnsupportedOperationException("Unsupported Platform: " + os);
                 };
                 IS_SUPPORT = false;
+            }
+            if (!IS_SUPPORT) {
+                driverSupplier.apply(null, null); // Throw error
             }
         }
     }

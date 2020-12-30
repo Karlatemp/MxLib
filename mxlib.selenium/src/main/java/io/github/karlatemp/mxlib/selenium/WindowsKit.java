@@ -3,10 +3,7 @@ package io.github.karlatemp.mxlib.selenium;
 import com.google.common.base.Splitter;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static io.github.karlatemp.mxlib.selenium.MxSelenium.commandProcessResult;
@@ -39,9 +36,14 @@ class WindowsKit {
     static String queryBrowserUsing() throws IOException {
         String override = System.getProperty("mxlib.selenium.browser"); // DEBUG ONLY
         if (override != null) return override;
-        return WindowsKit.parseRegResult(commandProcessResult(
+        Iterator<Map<String, String>> iterator = WindowsKit.parseRegResult(commandProcessResult(
                 "reg", "query", "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\Shell\\Associations\\URLAssociations\\https\\UserChoice", "/v", "ProgId"
-        )).values().iterator().next().get("ProgId");
+        )).values().iterator();
+        if (!iterator.hasNext()) {
+            throw new IllegalStateException("Couldn't read default browser from `HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\Shell\\Associations\\URLAssociations\\https\\UserChoice`, "
+                    + "Please open WindowsSettings and check your default browser.");
+        }
+        return iterator.next().get("ProgId");
     }
 
     static String queryProcOpenCommand(String progId) throws IOException {

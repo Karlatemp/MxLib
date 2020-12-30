@@ -7,7 +7,7 @@ dependencies {
     implementation project(':mxlib-api')
 
     // https://mvnrepository.com/artifact/io.github.karlatemp/unsafe-accessor
-    compile group: 'io.github.karlatemp', name: 'unsafe-accessor', version: '1.2.0'
+    compile group: 'io.github.karlatemp', name: 'unsafe-accessor', version: '1.2.1'
     compile group: 'io.github.karlatemp', name: 'caller', version: '1.1.0'
 
     // https://mvnrepository.com/artifact/com.google.guava/guava

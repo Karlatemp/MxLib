@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.karlatemp.mxlib.utils.Toolkit;
-import org.apache.http.client.methods.HttpGet;
 import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
 import org.codehaus.plexus.logging.console.ConsoleLoggerManager;
 
@@ -27,9 +26,18 @@ class FirefoxKit {
             } catch (Throwable ignored) {
             }
         }
-        try (OutputStream fos = new BufferedOutputStream(new FileOutputStream(firefox_cache))) {
-            MxSelenium.client.execute(new HttpGet(API)).getEntity()
-                    .writeTo(fos);
+        try {
+            NetKit.download(firefox_cache, API, "firefox_driver.json.redownload", (to, from) -> {
+                to.delete();
+                if (!from.renameTo(to)) {
+                    try (FileInputStream fis = new FileInputStream(from);
+                         FileOutputStream fos = new FileOutputStream(to)) {
+                        Toolkit.IO.writeTo(fis, fos);
+                    }
+                }
+            }, true);
+        } catch (Throwable exception) {
+            new IOException("Failed fetch latest firefox driver", exception).printStackTrace();
         }
     }
 
@@ -70,12 +78,7 @@ class FirefoxKit {
                 it.getKey().endsWith(exc)
         ).findFirst().get();
         File file = new File(MxSelenium.data, entry.getKey());
-        if (!file.isFile()) {
-            try (OutputStream fos = new BufferedOutputStream(new FileOutputStream(file))) {
-                MxSelenium.client.execute(new HttpGet(entry.getValue())).getEntity()
-                        .writeTo(fos);
-            }
-        }
+        NetKit.download(file, entry.getValue(), null, null);
         if (except.endsWith(".zip")) { // Windows NT
             File res = new File(MxSelenium.data, "geckodriver-v" + ver + ".exe");
             if (!res.isFile()) {
