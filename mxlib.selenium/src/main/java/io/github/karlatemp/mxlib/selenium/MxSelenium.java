@@ -17,11 +17,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.time.Duration;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
@@ -135,6 +135,7 @@ public class MxSelenium {
             if (initialized) return;
             initialized = true;
             String os = System.getProperty("os.name");
+            System.err.println("OS = " + os);
             if (os.toLowerCase().startsWith("windows ")) {
                 String browser = WindowsKit.queryBrowserUsing();
                 if (browser.startsWith("Chrome")) {
@@ -213,9 +214,84 @@ public class MxSelenium {
                         IS_SUPPORT = true;
                     } else {
                         driverSupplier = (agent, c) -> {
-                            throw new UnsupportedOperationException("Unsupported Platform: " + os + ", " + type + ", Only FireFox browser supportted now.");
+                            throw new UnsupportedOperationException("Unsupported Platform: " + os + ", " + type + ", Only FireFox browser supported now.");
                         };
                         IS_SUPPORT = false;
+                    }
+                } catch (Throwable error) {
+                    throw new UnsupportedOperationException("Unsupported Platform: " + os, error);
+                }
+            } else if (os.startsWith("Mac OS")) {
+                try {
+                    //noinspection ArraysAsListWithZeroOrOneArgument
+                    Collection<String> supportedBrowsers = new HashSet<>(Arrays.asList(
+                            "Google Chrome"
+                    ));
+                    //noinspection ArraysAsListWithZeroOrOneArgument
+                    Collection<String> browsers = new HashSet<>(Arrays.asList(
+                            "Safari" // Safari not for support. Safari cannot set UserAgent
+                    ));
+                    browsers.addAll(supportedBrowsers);
+                    List<String> browsersInstalled = Stream.of(
+                            Objects.requireNonNull(
+                                    new File("/Applications").listFiles(),
+                                    "`new File(\"/Applications\").listFiles()` is `null`"
+                            )
+                    )
+                            .filter(it -> it.getName().endsWith(".app"))
+                            .map(file -> {
+                                String name = file.getName();
+                                return name.substring(0, name.length() - 4);
+                            })
+                            .filter(browsers::contains)
+                            .collect(Collectors.toList());
+                    top:
+                    for (String browser : browsersInstalled) {
+                        switch (browser) {
+                            // TODO: Firefox
+                            case "Google Chrome": {
+                                String ver = commandProcessResult(
+                                        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                                        "--version"
+                                ).replace("Google Chrome", "").trim();
+                                // chromedriver_mac64.zip
+                                File chromedriverExecutable = NetKit.download(
+                                        new File(data, "chromedriver-" + ver + "-mac64"),
+                                        "https://chromedriver.storage.googleapis.com/" + ver + "/chromedriver_mac64.zip",
+                                        "chromedriver-" + ver + "-mac64.zip",
+                                        (tar, zipFile) -> {
+                                            try (ZipFile zip = new ZipFile(zipFile)) {
+                                                try (InputStream inp = zip.getInputStream(zip.getEntry("chromedriver"));
+                                                     OutputStream out = new BufferedOutputStream(new FileOutputStream(tar))) {
+                                                    Toolkit.IO.writeTo(inp, out);
+                                                }
+                                            }
+                                            tar.setExecutable(true);
+                                        }
+                                );
+                                System.setProperty("webdriver.chrome.driver", chromedriverExecutable.getPath());
+
+                                IS_SUPPORT = true;
+                                driverSupplier = (agent, c) -> {
+                                    ChromeOptions options = new ChromeOptions();
+                                    if (agent != null) options.addArguments("user-agent=" + agent);
+                                    if (c != null) c.accept(options);
+                                    return new ChromeDriver(options);
+                                };
+                                break top;
+                            }
+                        }
+                    }
+                    if (!IS_SUPPORT) {
+                        if (browsers.isEmpty()) {
+                            driverSupplier = (agent, c) -> {
+                                throw new UnsupportedOperationException("Unsupported Platform: " + os + ", No browser found. Please install one of the following browsers: " + supportedBrowsers);
+                            };
+                        } else {
+                            driverSupplier = (agent, c) -> {
+                                throw new UnsupportedOperationException("Unsupported Platform: " + os + ", No supported browser found. installed " + browsers + ". Please install one of the following browsers: " + supportedBrowsers);
+                            };
+                        }
                     }
                 } catch (Throwable error) {
                     throw new UnsupportedOperationException("Unsupported Platform: " + os, error);
