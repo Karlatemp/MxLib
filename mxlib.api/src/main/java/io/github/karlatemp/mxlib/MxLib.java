@@ -26,11 +26,19 @@ public class MxLib {
         return beanManager;
     }
 
+    public static boolean isLoggerSetup() {
+        return LOGGER_ATOMIC_REFERENCE.get() != null;
+    }
+
     @Contract(pure = true)
     public static @NotNull MLogger getLogger() {
         MLogger logger = LOGGER_ATOMIC_REFERENCE.get();
         if (logger == null) throw new ValueNotInitializedException();
         return logger;
+    }
+
+    public static boolean isJdkLoggerSetup() {
+        return JDK_LOGGER_ATOMIC_REFERENCE.get() != null;
     }
 
     @Contract(pure = true)

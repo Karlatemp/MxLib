@@ -199,7 +199,7 @@ public class MxSelenium {
                     IS_SUPPORT = true;
                 } else {
                     driverSupplier = (agent, c) -> {
-                        throw new UnsupportedOperationException("Unsupported browser: " + browser + ", Only chrome/firefox supportted");
+                        throw new UnsupportedOperationException("Unsupported browser: " + browser + ", Only chrome/firefox supported");
                     };
                     IS_SUPPORT = false;
                 }
