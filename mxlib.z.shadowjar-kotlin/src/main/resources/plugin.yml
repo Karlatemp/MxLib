@@ -3,3 +3,4 @@ version: ${version}
 main: kotlin.bukkit.runasbk.RunAsBukkit
 load: STARTUP
 
+api-version: 1.13

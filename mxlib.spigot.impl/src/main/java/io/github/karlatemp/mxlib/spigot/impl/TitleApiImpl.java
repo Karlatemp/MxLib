@@ -26,6 +26,7 @@ import static io.github.karlatemp.mxlib.spigot.PlayerHelper.getPlayerConnection;
 public class TitleApiImpl implements TitleApi {
     private static final Class<?> ChatSerializer = getNmsClass("IChatBaseComponent$ChatSerializer", "ChatSerializer");
     private static final Class<?> IChatBaseComponent = getNmsClass("IChatBaseComponent");
+    private static final Class<?> IChatMutableComponent = getNmsClass("IChatMutableComponent","IChatBaseComponent");
     private static final Class<?> PacketPlayOutChat = getNmsClass("PacketPlayOutChat");
     private static final Class<?> PacketPlayOutPlayerListHeaderFooter = getNmsClass("PacketPlayOutPlayerListHeaderFooter");
     private static final boolean PacketPlayOutPlayerListHeaderFooter$hf_array;
@@ -101,8 +102,8 @@ public class TitleApiImpl implements TitleApi {
             }
             PacketPlayOutChat$constructor = PPOC$cons;
             ChatSerializer$parse = trusted.unreflect(Reflections.findMethod(
-                    ChatSerializer, null, true, IChatBaseComponent, String.class
-            ).orElseThrow(() -> new NoSuchMethodException("static " + ChatSerializer.getName() + ".*(java.lang.String): " + IChatBaseComponent.getName())));
+                    ChatSerializer, null, true, IChatMutableComponent, String.class
+            ).orElseThrow(() -> new NoSuchMethodException("static " + ChatSerializer.getName() + ".*(java.lang.String): " + IChatMutableComponent.getName())));
         } catch (Throwable throwable) {
             throw new ExceptionInInitializerError(throwable);
         }
