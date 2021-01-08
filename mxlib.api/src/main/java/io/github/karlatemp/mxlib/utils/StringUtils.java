@@ -42,7 +42,7 @@ public class StringUtils {
         if (missing == null) missing = string;
         int index = string.indexOf(dep);
         if (index != -1) {
-            return string.substring(index);
+            return string.substring(index + dep.length());
         }
         return missing;
     }
