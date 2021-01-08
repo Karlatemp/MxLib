@@ -6,8 +6,10 @@ dependencies {
     implementation project(':mxlib-annotation')
     implementation project(':mxlib-api')
     implementation project(':mxlib-common')
-    implementation project(':mxlib-nbt')
 
-    compile 'io.netty:netty-all:4.1.50.Final'
+    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+
+    compile 'io.netty:netty-all:4.1.53.Final'
 
 }

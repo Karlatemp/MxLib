@@ -1,0 +1,12 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation project(':mxlib-annotation')
+    implementation project(':mxlib-api')
+    implementation project(':mxlib-common')
+    implementation project(':mxlib-nbt')
+    implementation project(':mxlib-network')
+
+}
