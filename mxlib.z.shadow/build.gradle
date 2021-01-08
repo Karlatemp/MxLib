@@ -8,6 +8,7 @@ plugins {
 def projects = new ArrayList<>(rootProject.subprojects)
 projects.remove(project)
 projects.removeIf { proj -> proj.name.contains("shadowjar") }
+projects.removeIf { it.name == "mxlib.z.srx.debug" }
 
 projects.forEach { proj ->
     proj.tasks.create("sourcesJar", Jar.class) { tsk ->
@@ -100,7 +101,7 @@ bintray {
     key = project.findProperty('bintray.key') ?: System.getenv("TOKEN")
 
     override = true
-    publish  = true
+    publish = true
 
     pkg {
         repo = 'misc'

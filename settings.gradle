@@ -20,6 +20,7 @@ imports(
         'mxlib.nbt',
         'mxlib.logger',
         'mxlib.network',
+        'mxlib.network.mc',
         'mxlib.spigot',
         'mxlib.spigot.kotlin',
         'mxlib.spigot.impl',
@@ -34,4 +35,8 @@ include(':mxlib.z.shadowjar-kotlin')
 
 
 // include(':mirai.console.terminal')
+
+if (new File("mxlib.z.srx.debug").isDirectory()) {
+    include(':mxlib.z.srx.debug')
+}
 
