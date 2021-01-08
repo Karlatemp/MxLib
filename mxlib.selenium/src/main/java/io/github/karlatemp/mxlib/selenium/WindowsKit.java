@@ -46,6 +46,16 @@ class WindowsKit {
         return iterator.next().get("ProgId");
     }
 
+    static Map<String, String> queryApplicationInfo(String progId) throws IOException {
+        Iterator<Map<String, String>> iterator = WindowsKit.parseRegResult(commandProcessResult(
+                "reg", "query", "HKEY_CLASSES_ROOT\\" + progId + "\\Application"
+        )).values().iterator();
+        if (!iterator.hasNext()) {
+            throw new IllegalStateException("Couldn't found Application info from `" + "HKEY_CLASSES_ROOT\\" + progId + "\\Application" + "`");
+        }
+        return iterator.next();
+    }
+
     static String queryProcOpenCommand(String progId) throws IOException {
         return WindowsKit.parseRegResult(commandProcessResult(
                 "reg", "query", "HKEY_CLASSES_ROOT\\" + progId + "\\shell\\open\\command", "/ve"

@@ -9,6 +9,11 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.edge.EdgeDriverService;
+import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.edgehtml.EdgeHtmlDriver;
+import org.openqa.selenium.edgehtml.EdgeHtmlOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -129,13 +134,13 @@ public class MxSelenium {
         }
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
     private static void initialize0() throws Exception {
         if (initialized) return;
         synchronized (MxSelenium.class) {
             if (initialized) return;
             initialized = true;
             String os = System.getProperty("os.name");
-            System.err.println("OS = " + os);
             if (os.toLowerCase().startsWith("windows ")) {
                 String browser = WindowsKit.queryBrowserUsing();
                 if (browser.startsWith("Chrome")) {
@@ -198,10 +203,28 @@ public class MxSelenium {
                     driverSupplier = firefox();
                     IS_SUPPORT = true;
                 } else {
-                    driverSupplier = (agent, c) -> {
-                        throw new UnsupportedOperationException("Unsupported browser: " + browser + ", Only chrome/firefox supported");
-                    };
-                    IS_SUPPORT = false;
+                    Map<String, String> applicationInfo = WindowsKit.queryApplicationInfo(browser);
+                    String appUserModelID = applicationInfo.get("AppUserModelID");
+                    if (appUserModelID != null) {
+                        if (appUserModelID.startsWith("Microsoft.MicrosoftEdge")) {
+                            /*
+                            // EdgeHTML cannot set UserAgent. not in support
+                            driverSupplier = (agent, c) -> {
+                                EdgeHtmlOptions options = new EdgeHtmlOptions();
+                                if (c != null) c.accept(options);
+                                return new EdgeHtmlDriver(options);
+                            };
+                            IS_SUPPORT = true;
+                            */
+                        }
+                    }
+
+                    if (!IS_SUPPORT) {
+                        driverSupplier = (agent, c) -> {
+                            throw new UnsupportedOperationException("Unsupported browser: " + browser + ", Only chrome/firefox supported");
+                        };
+                        IS_SUPPORT = false;
+                    }
                 }
             } else if (os.equals("Linux")) {
                 try {
@@ -283,13 +306,13 @@ public class MxSelenium {
                         }
                     }
                     if (!IS_SUPPORT) {
-                        if (browsers.isEmpty()) {
+                        if (browsersInstalled.isEmpty()) {
                             driverSupplier = (agent, c) -> {
                                 throw new UnsupportedOperationException("Unsupported Platform: " + os + ", No browser found. Please install one of the following browsers: " + supportedBrowsers);
                             };
                         } else {
                             driverSupplier = (agent, c) -> {
-                                throw new UnsupportedOperationException("Unsupported Platform: " + os + ", No supported browser found. installed " + browsers + ". Please install one of the following browsers: " + supportedBrowsers);
+                                throw new UnsupportedOperationException("Unsupported Platform: " + os + ", No supported browser found. installed " + browsersInstalled + ". Please install one of the following browsers: " + supportedBrowsers);
                             };
                         }
                     }
