@@ -9,11 +9,6 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.edge.EdgeDriverService;
-import org.openqa.selenium.edge.EdgeOptions;
-import org.openqa.selenium.edgehtml.EdgeHtmlDriver;
-import org.openqa.selenium.edgehtml.EdgeHtmlOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -37,7 +32,7 @@ public class MxSelenium {
     static final File JAVA_EXECUTABLE;
     static final File data = new File(MxLib.getDataStorage(), "selenium");
     static final HttpClient client = HttpClientBuilder.create().build();
-    static boolean IS_SUPPORT;
+    static boolean IS_SUPPORT, DEBUG = System.getProperty("mxlib.selenium.debug") != null;
 
     public static boolean isSupported() {
         return IS_SUPPORT;
@@ -109,7 +104,13 @@ public class MxSelenium {
     }
 
     static String commandProcessResult(boolean errorStream, String... cmd) throws IOException {
-        Process process = new ProcessBuilder(cmd).start();
+        ProcessBuilder builder = new ProcessBuilder(cmd);
+        if (errorStream) {
+            builder.redirectOutput(Toolkit.IO.REDIRECT_DISCARD);
+        } else {
+            builder.redirectError(Toolkit.IO.REDIRECT_DISCARD);
+        }
+        Process process = builder.start();
         return new String(IOUtils.readAllBytes(
                 errorStream ? process.getErrorStream() : process.getInputStream()
         ), STD_CHARSET == null ? Charset.defaultCharset() : STD_CHARSET);
@@ -154,6 +155,14 @@ public class MxSelenium {
                         }
                     }
                     String result = commandProcessResult("cmd", "/c", bat.getPath());
+                    if (result.trim().isEmpty()) {
+                        StringBuilder builder = new StringBuilder();
+                        for (String[] cmd : ChromeKit.windowsVerCommands) {
+                            builder.append(commandProcessResult(cmd));
+                            builder.append('\n').append('\n').append('\n');
+                        }
+                        result = builder.toString();
+                    }
                     String chromeverx = System.getProperty("mxlib.selenium.chrome.version");
                     if (chromeverx == null) {
                         Map<String, Map<String, String>> chromever = WindowsKit.parseRegResult(result);
@@ -174,9 +183,10 @@ public class MxSelenium {
                         chromeverx = ver;
                     }
 
+                    String driverVer = ChromeKit.getDriverVersion(chromeverx);
                     File chromedriverExecutable = NetKit.download(
-                            new File(data, "chromedriver-" + chromeverx + ".exe"),
-                            "https://chromedriver.storage.googleapis.com/" + chromeverx + "/chromedriver_win32.zip",
+                            new File(data, "chromedriver-" + driverVer + ".exe"),
+                            "https://chromedriver.storage.googleapis.com/" + driverVer + "/chromedriver_win32.zip",
                             "chromedriver-" + chromeverx + ".zip",
                             (tar, zipFile) -> {
                                 try (ZipFile zip = new ZipFile(zipFile)) {
@@ -278,9 +288,10 @@ public class MxSelenium {
                                         "--version"
                                 ).replace("Google Chrome", "").trim();
                                 // chromedriver_mac64.zip
+                                String driverVer = ChromeKit.getDriverVersion(ver);
                                 File chromedriverExecutable = NetKit.download(
-                                        new File(data, "chromedriver-" + ver + "-mac64"),
-                                        "https://chromedriver.storage.googleapis.com/" + ver + "/chromedriver_mac64.zip",
+                                        new File(data, "chromedriver-" + driverVer + "-mac64"),
+                                        "https://chromedriver.storage.googleapis.com/" + driverVer + "/chromedriver_mac64.zip",
                                         "chromedriver-" + ver + "-mac64.zip",
                                         (tar, zipFile) -> {
                                             try (ZipFile zip = new ZipFile(zipFile)) {

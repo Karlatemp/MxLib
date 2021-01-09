@@ -8,6 +8,7 @@ package io.github.karlatemp.mxlib.utils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.security.action.GetPropertyAction;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -310,6 +311,26 @@ public class Toolkit {
      * @since 2.5
      */
     public static class IO {
+
+        private static final File NULL_FILE = new File(
+                (GetPropertyAction.privilegedGetProperty("os.name")
+                        .startsWith("Windows") ? "NUL" : "/dev/null")
+        );
+        /**
+         * Indicates that subprocess output will be discarded.
+         * A typical implementation discards the output by writing to
+         * an operating system specific "null file".
+         *
+         * <p>It will always be true that
+         * <pre> {@code
+         * Redirect.DISCARD.file() is the filename appropriate for the operating system
+         * and may be null &&
+         * Redirect.DISCARD.type() == Redirect.Type.WRITE
+         * }</pre>
+         * @since 9
+         */
+        public static final ProcessBuilder.Redirect REDIRECT_DISCARD = ProcessBuilder.Redirect.to(NULL_FILE);
+
         public static long writeTo(@NotNull InputStream is, @NotNull OutputStream os) throws IOException {
             return writeTo(is, os, null);
         }
