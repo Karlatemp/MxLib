@@ -8,7 +8,6 @@ package io.github.karlatemp.mxlib.utils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.security.action.GetPropertyAction;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -313,7 +312,7 @@ public class Toolkit {
     public static class IO {
 
         private static final File NULL_FILE = new File(
-                (GetPropertyAction.privilegedGetProperty("os.name")
+                (System.getProperty("os.name")
                         .startsWith("Windows") ? "NUL" : "/dev/null")
         );
         /**
@@ -327,6 +326,7 @@ public class Toolkit {
          * and may be null &&
          * Redirect.DISCARD.type() == Redirect.Type.WRITE
          * }</pre>
+         *
          * @since 9
          */
         public static final ProcessBuilder.Redirect REDIRECT_DISCARD = ProcessBuilder.Redirect.to(NULL_FILE);
