@@ -21,6 +21,7 @@ imports(
         'mxlib.logger',
         'mxlib.network',
         'mxlib.network.mc',
+        'mxlib.network.cs',
         'mxlib.spigot',
         'mxlib.spigot.kotlin',
         'mxlib.spigot.impl',
