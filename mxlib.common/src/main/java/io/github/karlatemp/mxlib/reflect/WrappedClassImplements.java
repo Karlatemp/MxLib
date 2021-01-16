@@ -208,7 +208,7 @@ public class WrappedClassImplements {
                         !Modifier.isStatic(m.getModifiers())) {
                     for (Method sov : ovmets) {
                         if (!Modifier.isStatic(sov.getModifiers()) && Modifier.isFinal(sov.getModifiers())) {
-                            if (sov.getReturnType() == m.getReturnType()) {
+                            if (sov.getReturnType() == m.getReturnType() && sov.getName().equals(m.getName())) {
                                 if (Arrays.equals(sov.getParameterTypes(), m.getParameterTypes())) {
                                     continue rootLoop;
                                 }
