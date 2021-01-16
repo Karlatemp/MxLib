@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2018-2020 Karlatemp. All rights reserved.
+ * Copyright (c) 2018-2021 Karlatemp. All rights reserved.
  * @author Karlatemp <karlatemp@vip.qq.com> <https://github.com/Karlatemp>
- * @create 2020/02/15 15:32:55
  *
- * MXLib/mxlib.arguments/SSpec.java
+ * MXLib/MXLib.mxlib-common.main/SSpec.java
+ *
+ * Use of this source code is governed by the MIT license that can be found via the following link.
+ *
+ * https://github.com/Karlatemp/MxLib/blob/master/LICENSE
  */
 
 package io.github.karlatemp.mxlib.common.arguments;

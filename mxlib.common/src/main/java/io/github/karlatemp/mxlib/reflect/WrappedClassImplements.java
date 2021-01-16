@@ -1,6 +1,12 @@
 /*
- * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
- * Reserved.FileName: WrappedClassImplements.java@author: karlatemp@vip.qq.com: 19-11-29 下午2:08@version: 2.0
+ * Copyright (c) 2018-2021 Karlatemp. All rights reserved.
+ * @author Karlatemp <karlatemp@vip.qq.com> <https://github.com/Karlatemp>
+ *
+ * MXLib/MXLib.mxlib-common.main/WrappedClassImplements.java
+ *
+ * Use of this source code is governed by the MIT license that can be found via the following link.
+ *
+ * https://github.com/Karlatemp/MxLib/blob/master/LICENSE
  */
 
 package io.github.karlatemp.mxlib.reflect;

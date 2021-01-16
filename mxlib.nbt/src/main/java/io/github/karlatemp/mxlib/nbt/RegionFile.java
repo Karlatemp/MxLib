@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2018-2020 Karlatemp. All rights reserved.
+ * Copyright (c) 2018-2021 Karlatemp. All rights reserved.
  * @author Karlatemp <karlatemp@vip.qq.com> <https://github.com/Karlatemp>
- * @create 2020/03/13 18:23:51
  *
- * MXLib/mxlib.message/RegionFile.java
+ * MXLib/MXLib.mxlib-nbt.main/RegionFile.java
+ *
+ * Use of this source code is governed by the MIT license that can be found via the following link.
+ *
+ * https://github.com/Karlatemp/MxLib/blob/master/LICENSE
  */
 
 package io.github.karlatemp.mxlib.nbt;

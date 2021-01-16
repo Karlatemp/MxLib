@@ -3,3 +3,4 @@ build/
 .gradle
 /MxLibData
 /mxlib.z.srx.debug
+*.log

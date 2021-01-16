@@ -1,6 +1,12 @@
 /*
- * Copyright (c) 2018-2019 Karlatemp. All rights reserved.
- * Reserved.FileName: LineWriter.java@author: karlatemp@vip.qq.com: 19-11-9 下午2:14@version: 2.0
+ * Copyright (c) 2018-2021 Karlatemp. All rights reserved.
+ * @author Karlatemp <karlatemp@vip.qq.com> <https://github.com/Karlatemp>
+ *
+ * MXLib/MXLib.mxlib-api.main/LineWriter.java
+ *
+ * Use of this source code is governed by the MIT license that can be found via the following link.
+ *
+ * https://github.com/Karlatemp/MxLib/blob/master/LICENSE
  */
 
 package io.github.karlatemp.mxlib.utils;
