@@ -13,6 +13,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -193,10 +194,21 @@ public class WrappedClassImplements {
             init.visitEnd();
         }
         {
+            Method[] ovmets = own.getMethods();
+            rootLoop:
             for (Method m : bb.getMethods()) {
                 if (Modifier.isAbstract(m.getModifiers()) &&
                         (Modifier.isProtected(m.getModifiers()) || Modifier.isPublic(m.getModifiers())) &&
                         !Modifier.isStatic(m.getModifiers())) {
+                    for (Method sov : ovmets) {
+                        if (!Modifier.isStatic(sov.getModifiers()) && Modifier.isFinal(sov.getModifiers())) {
+                            if (sov.getReturnType() == m.getReturnType()) {
+                                if (Arrays.equals(sov.getParameterTypes(), m.getParameterTypes())) {
+                                    continue rootLoop;
+                                }
+                            }
+                        }
+                    }
                     // System.out.println("OMethod: " + m);
                     String DR;
                     final MethodVisitor impl = writer.visitMethod(
