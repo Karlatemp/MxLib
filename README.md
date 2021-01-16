@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     def mxlib = { artifact ->
-        return "io.github.karlatemp.mxlib:mxlib-$artifact:3.0-dev-9"
+        return "io.github.karlatemp.mxlib:mxlib-$artifact:3.0-dev-10"
     }
 
     implementation(mxlib('api'))
