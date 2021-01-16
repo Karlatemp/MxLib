@@ -32,9 +32,9 @@ public class MapEntrySerializer<K, V> implements PacketSerializer<Map.Entry<K, V
         );
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "RedundantCast", "rawtypes"})
     @Override
     public @NotNull Class<Map.Entry<K, V>[]> arrayType() {
-        return (Class<Map.Entry<K,V>[]>) Map.Entry[].class;
+        return (Class<Map.Entry<K, V>[]>) (Class) Map.Entry[].class;
     }
 }
