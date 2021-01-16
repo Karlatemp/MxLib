@@ -21,10 +21,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * RCON Client
- *
+ * <p>
  * How to use: See the `main(String[])` method in source
  */
 public class RemoteControlClient {
@@ -64,6 +65,8 @@ public class RemoteControlClient {
     protected Channel channel;
     public Consumer<Msg> onMsgHandle;
     public Runnable onDisconnect;
+    public Supplier<ReadTimeoutHandler> readTimeoutHandlerSupplier;
+    public Supplier<WriteTimeoutHandler> writeTimeoutHandlerSupplier;
 
     public RemoteControlClient(EventLoopGroup loopGroup, String host, int port, ByteBuf passwd) {
         this.loopGroup = loopGroup;
@@ -75,6 +78,23 @@ public class RemoteControlClient {
     protected void onDisconnect() throws Exception {
         if (onDisconnect != null)
             onDisconnect.run();
+    }
+
+    private static <T> T invokeSupplier(Supplier<T> supplier) {
+        if (supplier == null) return null;
+        return supplier.get();
+    }
+
+    protected ReadTimeoutHandler getReadTimeoutHandler() {
+        ReadTimeoutHandler readTimeoutHandler = invokeSupplier(this.readTimeoutHandlerSupplier);
+        if (readTimeoutHandler != null) return readTimeoutHandler;
+        return new ReadTimeoutHandler(30000, TimeUnit.MILLISECONDS);
+    }
+
+    protected WriteTimeoutHandler getWriteTimeoutHandler() {
+        WriteTimeoutHandler writeTimeoutHandler = invokeSupplier(this.writeTimeoutHandlerSupplier);
+        if (writeTimeoutHandler != null) return writeTimeoutHandler;
+        return new WriteTimeoutHandler(30000, TimeUnit.MILLISECONDS);
     }
 
     public void connect() throws InterruptedException, IOException {
@@ -95,8 +115,8 @@ public class RemoteControlClient {
                     @Override
                     protected void initChannel(Channel channel) throws Exception {
                         channel.pipeline()
-                                .addLast("read-timeout", new ReadTimeoutHandler(30000, TimeUnit.MILLISECONDS))
-                                .addLast("write-timeout", new WriteTimeoutHandler(30000, TimeUnit.MILLISECONDS))
+                                .addLast("read-timeout", getReadTimeoutHandler())
+                                .addLast("write-timeout", getWriteTimeoutHandler())
                                 .addLast("encoder", new MessageToByteEncoder<Msg>() {
                                     @Override
                                     public boolean acceptOutboundMessage(Object msg) throws Exception {
@@ -141,7 +161,7 @@ public class RemoteControlClient {
                                     @Override
                                     public void channelActive(ChannelHandlerContext ctx) throws Exception {
                                         ctx.channel().writeAndFlush(
-                                                Msg.newMsg(1, 3, passwd.copy())
+                                                Msg.newMsg(1, 3, passwd.duplicate())
                                         ).addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE);
                                     }
 
@@ -246,7 +266,24 @@ public class RemoteControlClient {
         ByteBuf passwd = Unpooled.wrappedBuffer("RCONPWD".getBytes(StandardCharsets.UTF_8));
         EventLoopGroup loopGroup = PipelineUtils.newEventLoopGroup();
         RemoteControlClient client = new RemoteControlClient(loopGroup, "localhost", 25575, passwd);
-        client.onDisconnect = loopGroup::shutdownGracefully;
+        client.readTimeoutHandlerSupplier = () -> new ReadTimeoutHandler(5, TimeUnit.SECONDS);
+        client.onDisconnect = new Runnable() {
+            int counter = 0;
+
+            @Override
+            public void run() {
+                if (counter++ == 2) {
+                    loopGroup.shutdownGracefully();
+                } else {
+                    try {
+                        client.connect();
+                        client.sendCmd("list");
+                    } catch (InterruptedException | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
         client.connect();
         client.onMsgHandle = new Consumer<Msg>() {
             final AtomicInteger last = new AtomicInteger();
