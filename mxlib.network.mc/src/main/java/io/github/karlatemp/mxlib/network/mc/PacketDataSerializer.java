@@ -92,6 +92,10 @@ public abstract class PacketDataSerializer extends ByteBuf {
         return this;
     }
 
+    @Override
+    public final ByteBuf unwrap() {
+        return a;
+    }
     /*public MinecraftKey readMinecraftKey() {
         return new MinecraftKey(readString(32767));
     }
