@@ -116,6 +116,10 @@ public class MxLibSpigotPlugin extends JavaPlugin {
         MxLib.setBeanManager(bm);
         MxLib.setDataStorage(getDataFolder());
         AnsiMessageFactory mf = new AnsiMessageFactory(new SimpleClassLocator() {
+            private void record(Throwable throwable) {
+                Bukkit.getLogger().log(Level.SEVERE, "[MxLib] Error in locating", throwable);
+            }
+
             @Override
             public @Nullable Path findLocate(@NotNull String classname) {
                 // String path = classname.replace('.', '/') + ".class";
@@ -124,7 +128,12 @@ public class MxLibSpigotPlugin extends JavaPlugin {
                 try {
                     Class<?> name = Class.forName(classname);
                     return findLocate(name);
-                } catch (ClassNotFoundException ignore) {
+                } catch (ClassNotFoundException z) {
+                    if (z.getCause() != null) {
+                        record(z);
+                    }
+                } catch (Throwable throwable) {
+                    record(throwable);
                 }
                 return null;
             }
