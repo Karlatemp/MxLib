@@ -28,5 +28,6 @@ shadowJar {
     configurations = [project.configurations.runtime, project.configurations.inShadow]
     dependencies {
         exclude(dependency('com.google.guava:guava'))
+        exclude(dependency('io.netty:'))
     }
 }
