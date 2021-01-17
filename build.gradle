@@ -21,7 +21,7 @@ plugins {
 allprojects {
 
     group 'io.github.karlatemp.mxlib'
-    version '3.0-dev-10'
+    version '3.0-dev-11'
 
     repositories {
         mavenLocal()
