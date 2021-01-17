@@ -16,6 +16,7 @@ import io.github.karlatemp.mxlib.exception.ValueInitializedException;
 import io.github.karlatemp.mxlib.exception.ValueNotInitializedException;
 import io.github.karlatemp.mxlib.logger.MLogger;
 import io.github.karlatemp.mxlib.logger.MLoggerFactory;
+import io.github.karlatemp.mxlib.logger.StdLogger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -135,5 +136,13 @@ public class MxLib {
             }
             throw new ValueInitializedException();
         }
+    }
+
+    public static MLogger getLoggerOrStd(String name) {
+        MLoggerFactory factory = LOGGER_FACTORY_ATOMIC_REFERENCE.get();
+        if (factory != null) {
+            return factory.getLogger(name);
+        }
+        return new StdLogger(name, System.out);
     }
 }
