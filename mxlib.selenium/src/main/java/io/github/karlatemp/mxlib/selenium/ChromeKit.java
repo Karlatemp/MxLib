@@ -11,16 +11,59 @@
 
 package io.github.karlatemp.mxlib.selenium;
 
+import io.github.karlatemp.mxlib.MxLib;
+import io.github.karlatemp.mxlib.logger.MLogger;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class ChromeKit {
+    static final String address;
+    static final String GOOGLE_API = "https://chromedriver.storage.googleapis.com/";
+    static final String TAOBAO_MIRROR = "http://npm.taobao.org/mirrors/chromedriver/";
+
+    private static MLogger getLogger() {
+        return MxLib.getLoggerOrStd("MxLib Selenium - Chrome");
+    }
+
+    static {
+        MLogger logger = getLogger();
+        if (System.getProperty("mxlib.selenium.chrome.no-mirror") != null) {
+            address = GOOGLE_API;
+            logger.info("Google Chrome Driver download mirror was disabled by `mxlib.selenium.chrome.no-mirror`");
+            logger.info("Using default location: " + GOOGLE_API);
+        } else {
+            String mirror = System.getProperty("mxlib.selenium.chrome.mirror");
+            if (mirror != null) {
+                if (mirror.endsWith("/")) {
+                    address = mirror;
+                } else {
+                    address = mirror + '/';
+                }
+                logger.info("Google Chrome Driver download mirror set by `mxlib.selenium.chrome.mirror`");
+                logger.info("Using " + mirror);
+            } else {
+                if (Locale.getDefault().equals(Locale.SIMPLIFIED_CHINESE)) {
+                    address = TAOBAO_MIRROR;
+                    logger.info("Running on 中国-大陆");
+                    logger.info("Using taoboo mirror default");
+                } else {
+                    logger.info("Using default location");
+                    address = GOOGLE_API;
+                }
+                logger.info("MxLib will download chrome driver from " + address);
+                logger.info("Change it with `-Dmxlib.selenium.chrome.mirror=.....` vm option");
+                logger.info("Or disable it with `-Dmxlib.selenium.chrome.no-mirror`");
+            }
+        }
+    }
+
     static String getDriverVersion(String chromever) throws IOException {
         String cver = chromever;
         File verfile = new File(MxSelenium.data, "chromedriver-" + chromever + ".mapping");
@@ -29,16 +72,17 @@ class ChromeKit {
                 return bis.readLine();
             }
         }
+        MLogger logger = getLogger();
         List<Throwable> throwables = new ArrayList<>(5);
         while (true) {
             try {
                 String uri;
                 if (chromever.isEmpty()) {
-                    uri = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE";
+                    uri = address + "LATEST_RELEASE";
                 } else {
-                    uri = "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_" + chromever;
+                    uri = address + "LATEST_RELEASE_" + chromever;
                 }
-                System.out.println("Fetching chrome driver version from " + uri);
+                logger.info("Fetching chrome driver version from " + uri);
                 HttpResponse response = MxSelenium.client.execute(new HttpGet(uri));
                 if (response.getStatusLine().getStatusCode() != 200) {
                     response.getEntity().getContent().close();
@@ -49,7 +93,7 @@ class ChromeKit {
                      Writer writer = new FileWriter(verfile)
                 ) {
                     String l = reader.readLine();
-                    System.out.println("Ver is " + l);
+                    logger.info("Driver version is " + l);
                     writer.write(l);
                     return l;
                 }

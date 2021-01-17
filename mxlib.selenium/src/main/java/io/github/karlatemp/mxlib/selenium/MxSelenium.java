@@ -197,8 +197,8 @@ public class MxSelenium {
                     String driverVer = ChromeKit.getDriverVersion(chromeverx);
                     File chromedriverExecutable = NetKit.download(
                             new File(data, "chromedriver-" + driverVer + ".exe"),
-                            "https://chromedriver.storage.googleapis.com/" + driverVer + "/chromedriver_win32.zip",
-                            "chromedriver-" + chromeverx + ".zip",
+                            ChromeKit.address + driverVer + "/chromedriver_win32.zip",
+                            "chromedriver-" + driverVer + ".zip",
                             (tar, zipFile) -> {
                                 try (ZipFile zip = new ZipFile(zipFile)) {
                                     try (InputStream inp = zip.getInputStream(zip.getEntry("chromedriver.exe"));
@@ -302,8 +302,8 @@ public class MxSelenium {
                                 String driverVer = ChromeKit.getDriverVersion(ver);
                                 File chromedriverExecutable = NetKit.download(
                                         new File(data, "chromedriver-" + driverVer + "-mac64"),
-                                        "https://chromedriver.storage.googleapis.com/" + driverVer + "/chromedriver_mac64.zip",
-                                        "chromedriver-" + ver + "-mac64.zip",
+                                        ChromeKit.address + driverVer + "/chromedriver_mac64.zip",
+                                        "chromedriver-" + driverVer + "-mac64.zip",
                                         (tar, zipFile) -> {
                                             try (ZipFile zip = new ZipFile(zipFile)) {
                                                 try (InputStream inp = zip.getInputStream(zip.getEntry("chromedriver"));
