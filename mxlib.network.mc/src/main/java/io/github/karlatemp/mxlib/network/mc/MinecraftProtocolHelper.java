@@ -215,14 +215,19 @@ public class MinecraftProtocolHelper {
                                         }
                                     }
 
+                                    private boolean completed = false;
+
                                     @Override
                                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                                        if (completed) return;
                                         long ping;
                                         if (step <= 1) {
                                             ping = -1;
                                         } else {
                                             ping = pingEndTm - pingStartTm;
                                         }
+                                        completed = true;
+                                        ctx.channel().close();
                                         callback.complete(desc, ping, cause);
                                     }
 
