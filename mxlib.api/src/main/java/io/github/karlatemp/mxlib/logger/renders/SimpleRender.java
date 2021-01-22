@@ -51,6 +51,7 @@ public class SimpleRender implements MessageRender {
                             objects.set(0, factory.dump((Throwable) last, true));
                         } else {
                             objects.set(objects.size() - 1, StringBuilderFormattable.LN);
+                            objects.add(factory.dump((Throwable) last, true));
                         }
                     }
                 }

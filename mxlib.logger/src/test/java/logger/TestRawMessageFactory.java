@@ -73,6 +73,7 @@ public class TestRawMessageFactory {
             }
         }
         new Lg("HX").info(new Exception("Hello!"));
+        new Lg("HX").info("WXC", new Exception("Hello!"));
         new Lg("OWXV").warn(new Exception("Hi!"));
         new Lg("HX").info(new Exception("HOW ARE YOU!", new Exception("sx", new Exception("RT"))));
 
