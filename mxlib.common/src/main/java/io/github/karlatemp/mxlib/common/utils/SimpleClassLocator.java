@@ -14,6 +14,7 @@ package io.github.karlatemp.mxlib.common.utils;
 import io.github.karlatemp.caller.CallerFinder;
 import io.github.karlatemp.mxlib.reflect.Reflections;
 import io.github.karlatemp.mxlib.utils.ClassLocator;
+import io.github.karlatemp.mxlib.utils.Lazy;
 import io.github.karlatemp.mxlib.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +28,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class SimpleClassLocator implements ClassLocator {
+    private static final Lazy<Path> JRT_MODULES = Lazy.lazy(
+            () -> FileSystems.getFileSystem(URI.create("jrt:/")).getPath("/modules")
+    );
+
     private final ClassLoader loader;
 
     public SimpleClassLocator(ClassLoader loader) {
@@ -84,7 +89,11 @@ public class SimpleClassLocator implements ClassLocator {
                 return Paths.get(URI.create(file));
             }
             case "jrt": {
-                return FileSystems.getFileSystem(URI.create("jrt:/")).getPath("/");
+                String path = url.getPath();
+                if (path == null || path.isEmpty()) return JRT_MODULES.get();
+                return JRT_MODULES.get().resolve(
+                        StringUtils.substringBefore(path.substring(1), "/", "")
+                );
             }
         }
         return null;
