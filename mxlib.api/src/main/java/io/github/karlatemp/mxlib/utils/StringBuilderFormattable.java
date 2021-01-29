@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public interface StringBuilderFormattable {
     static StringBuilderFormattable LN = by("\n");
@@ -86,6 +87,30 @@ public interface StringBuilderFormattable {
             @Override
             public String to_string() {
                 return charSequence.toString();
+            }
+        };
+    }
+
+    static StringBuilderFormattable by(Supplier<CharSequence> supplier) {
+        return new StringBuilderFormattable() {
+            @Override
+            public void formatTo(@NotNull StringBuilder builder) {
+                builder.append(supplier.get());
+            }
+
+            @Override
+            public String toString() {
+                return supplier.get().toString();
+            }
+
+            @Override
+            public @NotNull Object lazyToStringBridge() {
+                return this;
+            }
+
+            @Override
+            public String to_string() {
+                return toString();
             }
         };
     }
