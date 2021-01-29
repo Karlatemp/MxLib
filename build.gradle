@@ -37,9 +37,13 @@ allprojects {
         dependencies {
             testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
             testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
-            if (project.name.endsWith("-kotlin")) {
+            if (project.name.endsWith("-kotlin")
+                    || project.name == 'mxlib.z.srx.debug'
+            ) {
                 def ktimp = { f ->
-                    if (project.name == "mxlib.z.shadowjar-kotlin") {
+                    if (project.name == "mxlib.z.shadowjar-kotlin"
+                            || project.name == 'mxlib.z.srx.debug'
+                    ) {
                         compile f
                     } else {
                         compileOnly f
@@ -54,9 +58,6 @@ allprojects {
                 ktimp "org.jetbrains.kotlin:kotlin-reflect"
                 ktimp "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.1"
                 testCompile "org.jetbrains.kotlin:kotlin-test-junit5"
-//                exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core-common")
-//                exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm")
-//                exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core-metadata")
             }
         }
 
