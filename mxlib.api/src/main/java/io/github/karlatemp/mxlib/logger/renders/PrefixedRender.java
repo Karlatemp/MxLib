@@ -31,6 +31,33 @@ public class PrefixedRender implements MessageRender {
     private final MessageRender render;
 
     public interface PrefixSupplier {
+        PrefixSupplier EMPTY = new PrefixSupplier() {
+            @Override
+            public @NotNull CharSequence rendPrefix(@Nullable String loggerName, @Nullable MMarket market, @NotNull StringBuilder content, boolean isError, @Nullable Level level, @Nullable LogRecord record) {
+                return new StringBuilder();
+            }
+
+            @Override
+            public @NotNull PrefixSupplier plus(@NotNull CharSequence next) {
+                return constant(next);
+            }
+
+            @Override
+            public @NotNull PrefixSupplier plus(@NotNull PrefixSupplier next) {
+                return next;
+            }
+
+            @Override
+            public @NotNull PrefixSupplier aligned() {
+                return this;
+            }
+
+            @Override
+            public @NotNull PrefixSupplier aligned(AlignedSupplier.@Nullable AlignType type) {
+                return this;
+            }
+        };
+
         @NotNull CharSequence rendPrefix(
                 @Nullable String loggerName,
                 @Nullable MMarket market,
