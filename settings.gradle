@@ -30,6 +30,7 @@ imports(
         'mxlib.command.kotlin',
         'mxlib.nbt',
         'mxlib.logger',
+        'mxlib.logger.slf4j',
         'mxlib.network',
         'mxlib.network.mc',
         'mxlib.network.cs',
