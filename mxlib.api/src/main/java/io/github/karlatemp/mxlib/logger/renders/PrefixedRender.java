@@ -246,6 +246,16 @@ public class PrefixedRender implements MessageRender {
             }
             return alignType.apply(l, maxLength, c);
         }
+
+        @Override
+        public @NotNull PrefixSupplier aligned() {
+            return this; // No effect for re-aligned
+        }
+
+        @Override
+        public @NotNull PrefixSupplier aligned(@Nullable AlignType type) {
+            return this; // No effect for re-aligned
+        }
     }
 
     public PrefixedRender(
