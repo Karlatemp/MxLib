@@ -10,6 +10,7 @@
  */
 
 @file:JvmName("ReflectionKt")
+@file:Suppress("NOTHING_TO_INLINE")
 
 package io.github.karlatemp.mxlib.reflect
 

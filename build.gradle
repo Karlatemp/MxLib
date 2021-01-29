@@ -76,6 +76,9 @@ allprojects {
         }
 
         try {
+            kotlin {
+                explicitApi()
+            }
 
             compileKotlin {
                 kotlinOptions {
