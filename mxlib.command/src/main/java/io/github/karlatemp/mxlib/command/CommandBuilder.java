@@ -14,6 +14,7 @@ package io.github.karlatemp.mxlib.command;
 import io.github.karlatemp.caller.CallerFinder;
 import io.github.karlatemp.caller.StackFrame;
 import io.github.karlatemp.mxlib.MxLib;
+import io.github.karlatemp.mxlib.bean.IBeanManager;
 import io.github.karlatemp.mxlib.exception.ScanException;
 import io.github.karlatemp.mxlib.reflect.Reflections;
 import io.github.karlatemp.mxlib.utils.IJarScanner;
@@ -52,6 +53,7 @@ public class CommandBuilder {
     private Class<?> source;
     private Logger logger;
     private File file;
+    private IBeanManager beanManager;
 
     public CommandBuilder provider(CommandProvider provider) {
         this.provider = provider;
@@ -89,6 +91,11 @@ public class CommandBuilder {
         return ending.apply(buildCommands());
     }
 
+    public CommandBuilder withBeanManager(IBeanManager beanManager) {
+        this.beanManager = beanManager;
+        return this;
+    }
+
     private StackFrame frame;
 
     public synchronized ICommand buildCommands() {
@@ -108,6 +115,12 @@ public class CommandBuilder {
             if (frame == null) frame = CallerFinder.getCaller();
             ((InitWithCallerProvider) provider).setup(frame);
         }
+        if (beanManager == null) {
+            beanManager = provider.getBeanManager();
+        }
+        if (beanManager == null) {
+            beanManager = MxLib.getBeanManager();
+        }
         List<Class<?>> target;
         if (classes.isEmpty()) {
             List<ClassLoader> loaders = Arrays.asList(
@@ -115,21 +128,21 @@ public class CommandBuilder {
                     Thread.currentThread().getContextClassLoader(),
                     Reflections.getClassLoader(getClass())
             );
-            final IJarScanner scanner = MxLib.getBeanManager().getBeanNonNull(IJarScanner.class);
+            final IJarScanner scanner = beanManager.getBeanNonNull(IJarScanner.class);
             try {
                 List<String> list;
+                String pck = this.pck.getName() + ".";
                 if (file == null) {
                     if (source == null) {
                         throw new IllegalArgumentException("No ClassSource. No FileSource.");
                     }
                     list = scanner.scan(source, new ArrayList<>());
                 } else {
-                    String pck = this.pck.getName() + ".";
-                    list = scanner.scan(file, new ArrayList<>()).stream()
-                            .filter(a -> a.startsWith(pck))
-                            .collect(Collectors.toList());
+                    list = scanner.scan(file, new ArrayList<>());
                 }
-                target = list.stream().filter(x -> !x.endsWith("package-info"))
+                target = list.stream()
+                        .filter(a -> a.startsWith(pck))
+                        .filter(x -> !x.endsWith("package-info"))
                         .map(cn -> {
                             for (ClassLoader loader : loaders) {
                                 try {
