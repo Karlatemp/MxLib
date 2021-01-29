@@ -26,7 +26,7 @@ public class PathUtils {
         Path path = new SimpleClassLocator(null).findLocate(String.class);
         assert path != null;
         FileSystemProvider provider = path.getFileSystem().provider();
-        if (path.getFileSystem().provider().getScheme().equals("jre")) {
+        if (path.getFileSystem().provider().getScheme().equals("jrt")) {
             return p -> p.getFileSystem().provider() == provider;
         }
         return p -> p.equals(path);
