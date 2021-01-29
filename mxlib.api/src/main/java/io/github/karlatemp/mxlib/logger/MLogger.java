@@ -29,9 +29,22 @@ public interface MLogger {
 
     boolean isDebugEnabled(MMarket market);
 
+    boolean isVerboseEnabled();
+
+    boolean isVerboseEnabled(MMarket market);
+
+    boolean isInfoEnabled();
+
+    boolean isInfoEnabled(MMarket market);
+
     boolean isWarnEnabled();
 
     boolean isWarnEnabled(MMarket market);
+
+    boolean isErrorEnabled();
+
+    boolean isErrorEnabled(MMarket market);
+
     //////////////////////////////////////////////////////////////
 
     void log(MMarket market, LogRecord logRecord);

@@ -68,6 +68,36 @@ public abstract class AwesomeLogger extends AbstractLogger {
     }
 
     @Override
+    public boolean isVerboseEnabled() {
+        return isEnabled(Level.FINER);
+    }
+
+    @Override
+    public boolean isVerboseEnabled(MMarket market) {
+        return isEnabled(market, Level.FINER);
+    }
+
+    @Override
+    public boolean isInfoEnabled() {
+        return isEnabled(Level.INFO);
+    }
+
+    @Override
+    public boolean isInfoEnabled(MMarket market) {
+        return isEnabled(market, Level.INFO);
+    }
+
+    @Override
+    public boolean isErrorEnabled() {
+        return isEnabled(Level.SEVERE);
+    }
+
+    @Override
+    public boolean isErrorEnabled(MMarket market) {
+        return isEnabled(market, Level.SEVERE);
+    }
+
+    @Override
     public void log(MMarket market, LogRecord logRecord) {
         if (isEnabled(market, logRecord.getLevel()))
             log0(market, logRecord);
