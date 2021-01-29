@@ -20,7 +20,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 @OptIn(InternalCoroutinesApi::class)
-object BukkitSchedulerDispatcher : CoroutineDispatcher(), Delay {
+public object BukkitSchedulerDispatcher : CoroutineDispatcher(), Delay {
     internal fun wrapper(): Wrapper = Wrapper()
 
     internal class Wrapper : CoroutineDispatcher(), Delay {

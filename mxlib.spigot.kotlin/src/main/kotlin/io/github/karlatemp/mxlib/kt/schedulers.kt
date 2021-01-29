@@ -9,6 +9,8 @@
  * https://github.com/Karlatemp/MxLib/blob/master/LICENSE
  */
 
+@file:Suppress("NOTHING_TO_INLINE")
+
 package io.github.karlatemp.mxlib.kt
 
 import org.bukkit.plugin.Plugin

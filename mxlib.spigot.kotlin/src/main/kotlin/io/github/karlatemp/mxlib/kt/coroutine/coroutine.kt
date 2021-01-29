@@ -26,16 +26,16 @@ import org.bukkit.plugin.Plugin
 import kotlin.coroutines.*
 import kotlinx.coroutines.runBlocking as runBlockingKC
 
-fun Plugin.newCoroutineScope(
+public fun Plugin.newCoroutineScope(
     context: CoroutineContext = EmptyCoroutineContext
 ): CoroutineScope = CoroutineScope(context + CPlugin(this) + BukkitSchedulerDispatcher)
 
-fun <T> Plugin.runBlocking(
+public fun <T> Plugin.runBlocking(
     context: CoroutineContext = EmptyCoroutineContext,
     block: suspend CoroutineScope.() -> T
 ): T = runBlockingKC(context = context + CPlugin(this) + BukkitSchedulerDispatcher, block = block)
 
-fun Plugin.launch(
+public fun Plugin.launch(
     context: CoroutineContext = EmptyCoroutineContext,
     start: CoroutineStart = CoroutineStart.DEFAULT,
     block: suspend CoroutineScope.() -> Unit
@@ -51,7 +51,7 @@ private suspend fun bkDispatcher(): BukkitSchedulerDispatcher {
     error("Current coroutine dispatcher not BukkitSchedulerDispatcher")
 }
 
-suspend fun nextTick(ticks: Long = 1L) {
+public suspend fun nextTick(ticks: Long = 1L) {
     bkDispatcher()
     suspendCoroutine<Unit> { continuation ->
         Bukkit.getScheduler().runTaskLater(continuation.context.bukkitPlugin, ticks) {
@@ -60,21 +60,21 @@ suspend fun nextTick(ticks: Long = 1L) {
     }
 }
 
-suspend fun <R> mainThread(block: suspend CoroutineScope.() -> R): R {
+public suspend fun <R> mainThread(block: suspend CoroutineScope.() -> R): R {
     bkDispatcher()
     return withContext(
         bkDispatcher().wrapper() + BukkitSchedulerDispatcher.RunMode.MAIN
     ) { block() }
 }
 
-suspend fun <R> asyncThread(block: suspend CoroutineScope.() -> R): R {
+public suspend fun <R> asyncThread(block: suspend CoroutineScope.() -> R): R {
     bkDispatcher()
     return withContext(
         bkDispatcher().wrapper() + BukkitSchedulerDispatcher.RunMode.NON_MAIN
     ) { block() }
 }
 
-suspend fun Player.waitNextMessage(
+public suspend fun Player.waitNextMessage(
     cancelEvent: Boolean = true,
 ): CompletableDeferred<String> {
     val cd = CompletableDeferred<String>()
