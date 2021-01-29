@@ -17,6 +17,8 @@ import io.github.karlatemp.mxlib.utils.ClassLocator;
 import io.github.karlatemp.mxlib.utils.StringBuilderFormattable;
 import io.github.karlatemp.mxlib.utils.StringUtils;
 
+import java.lang.management.LockInfo;
+
 import static io.github.karlatemp.mxlib.utils.StringBuilderFormattable.by;
 
 public class AnsiMessageFactory extends RawMessageFactory {
@@ -105,4 +107,10 @@ public class AnsiMessageFactory extends RawMessageFactory {
         return link;
     }
 
+    protected void plusLockInfo(StringBuilderFormattable link, LockInfo lockInfo) {
+        link.plusMsg(_C).plusMsg(lockInfo.getClassName())
+                .plusMsg(RESET).plusMsg("@")
+                .plusMsg(_B).plusMsg(Integer.toHexString(lockInfo.getIdentityHashCode()))
+        ;
+    }
 }
