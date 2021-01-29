@@ -77,21 +77,26 @@ allprojects {
 
         try {
             kotlin {
-                explicitApi()
+                if (project.name != 'mxlib.z.srx.debug') {
+                    explicitApi()
+                }
             }
+            def freeCompilerArgs0 = [
+                    '-Xopt-in=kotlin.RequiresOptIn',
+                    '-Xopt-in=kotlin.contracts.ExperimentalContracts',
+                    '-Xjvm-default=enable',
+            ]
 
             compileKotlin {
                 kotlinOptions {
                     jvmTarget = '1.8'
-                    freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn',
-                                         '-Xjvm-default=enable']
+                    freeCompilerArgs += freeCompilerArgs0
                 }
             }
             compileTestKotlin {
                 kotlinOptions {
                     jvmTarget = '1.8'
-                    freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn',
-                                         '-Xjvm-default=enable']
+                    freeCompilerArgs += freeCompilerArgs0
                 }
             }
 
