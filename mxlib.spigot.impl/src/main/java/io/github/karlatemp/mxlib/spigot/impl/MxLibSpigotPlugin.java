@@ -30,11 +30,12 @@ import io.github.karlatemp.mxlib.spigot.command.BukkitCommandExecutor;
 import io.github.karlatemp.mxlib.spigot.command.BukkitCommandProvider;
 import io.github.karlatemp.mxlib.spigot.impl.cmimp.RCmd;
 import io.github.karlatemp.mxlib.spigot.internal.MxLibSpigotAccess;
-import io.github.karlatemp.mxlib.translate.AbstractTranslator;
 import io.github.karlatemp.mxlib.translate.SystemTranslator;
+import io.github.karlatemp.mxlib.translate.TranslateLoader;
 import io.github.karlatemp.mxlib.translate.Translator;
 import io.github.karlatemp.mxlib.utils.ClassLocator;
 import io.github.karlatemp.mxlib.utils.IteratorSupplier;
+import io.github.karlatemp.mxlib.utils.StringBuilderFormattable;
 import io.github.karlatemp.mxlib.utils.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -63,11 +64,13 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+@MPlugin
 public class MxLibSpigotPlugin extends JavaPlugin {
     private static final Map<Path, String> MAPPING = new HashMap<>();
     private static final Map<JavaPlugin, IBeanManager> BEAN_MANAGER_MAP = new HashMap<>();
     private static final Lock BEAN_MANAGER_MAP_LOCK = new ReentrantLock();
-    static AbstractTranslator MXLIB_TRANSLATOR;
+    static boolean DEBUG = System.getProperty("mxlib.debug") != null;
+    static Translator MXLIB_TRANSLATOR;
 
     private static class BM extends SimpleBeanManager implements MxLibSpigotAccess {
         @Override
@@ -77,14 +80,16 @@ public class MxLibSpigotPlugin extends JavaPlugin {
     }
 
     private static void setup(JavaPlugin jp) {
+        PlLogger.inject(jp);
         if (jp.getClass().getDeclaredAnnotation(MPlugin.class) == null) return;
         final IBeanManager scope;
+        BEAN_MANAGER_MAP_LOCK.lock();
         try {
             IBeanManager manager = BEAN_MANAGER_MAP.get(jp);
             if (manager == null) {
                 BEAN_MANAGER_MAP.put(jp, scope = newScope(jp));
             } else {
-                scope = manager;
+                return; // Initialized
             }
         } finally {
             BEAN_MANAGER_MAP_LOCK.unlock();
@@ -107,12 +112,16 @@ public class MxLibSpigotPlugin extends JavaPlugin {
             }
             Function<String, Predicate<ClassNode>> withAnno = key -> {
                 String kx = "L" + key.replace('.', '/') + ";";
-                return node -> node.visibleAnnotations.stream().anyMatch(anno -> anno.desc.equals(kx));
+                return node -> {
+                    if (node.visibleAnnotations == null) return false;
+                    return node.visibleAnnotations.stream().anyMatch(anno -> anno.desc.equals(kx));
+                };
             };
             for (ClassNode node : new IteratorSupplier<>(classTree.stream()
                     .filter(withAnno.apply(Configuration.class.getName()))
                     .iterator())) {
                 Class<?> klass = Class.forName(node.name.replace('/', '.'), true, classLoader);
+                // TODO
 
             }
 
@@ -169,9 +178,20 @@ public class MxLibSpigotPlugin extends JavaPlugin {
                         .plus(StringUtils.BkColors.RESET + "] ")
         );
         Consumer<StringBuilder> printer = System.out::println;
-        MLogger toplevel = new AwesomeLogger.Awesome("Root", printer, renderX);
+        MLogger toplevel = new AwesomeLogger.Awesome("MxLib RootLogger", printer, renderX) {
+            @Override
+            public boolean isEnabled(Level level) {
+                if (DEBUG) return true;
+                return level.intValue() >= Level.INFO.intValue();
+            }
+        };
         MxLib.setLogger(toplevel);
-        MxLib.setJdkLogger(new MJdkLogger(toplevel));
+        MxLib.setJdkLogger(new MJdkLogger(toplevel) {
+            @Override
+            public boolean isLoggable(Level level) {
+                return DEBUG || super.isLoggable(level);
+            }
+        });
         MxLib.setLoggerFactory(name -> new AwesomeLogger.Awesome(name, printer, renderX));
         Logger root = JdkLoggerUtils.ROOT.get();
         Handler[] handlers = root.getHandlers();
@@ -190,7 +210,14 @@ public class MxLibSpigotPlugin extends JavaPlugin {
         bm.register(SystemTranslator.class, new BkSysTranslator());
 
         ResourcePackProcessor.invoke();
-        MXLIB_TRANSLATOR = TransLoader.loadTranslate(this);
+        MXLIB_TRANSLATOR = new TranslateLoader.WithClassLoader(
+                getClassLoader(),
+                "mxlib-command-translates/trans",
+                toplevel::error
+        ).loadTranslate(null);
+        toplevel.debug(StringBuilderFormattable.by(() -> "Current Translator is " + MXLIB_TRANSLATOR));
+        MXLIB_TRANSLATOR = TransLoader.LOADER.loadTranslate(this);
+        toplevel.debug(StringBuilderFormattable.by(() -> "Current Translator is " + MXLIB_TRANSLATOR));
     }
 
     @Override
@@ -199,9 +226,8 @@ public class MxLibSpigotPlugin extends JavaPlugin {
         for (Plugin p : Bukkit.getPluginManager().getPlugins()) {
             if (p instanceof JavaPlugin) {
                 JavaPlugin jp = (JavaPlugin) p;
-                PlLogger.inject(jp);
-                BEAN_MANAGER_MAP.put(jp, newScope(jp));
                 MAPPING.put(PluginClassLoaderAccess.GET_FILE.apply(jp).toPath().toAbsolutePath(), jp.getDescription().getVersion());
+                setup(jp);
             }
         }
         BeanManagers.registerAll(getFile().toPath(), getClassLoader(), MxLib.getBeanManager());
@@ -237,7 +263,7 @@ public class MxLibSpigotPlugin extends JavaPlugin {
 
     private static IBeanManager newScope(JavaPlugin jp) {
         IBeanManager subScope = MxLib.getBeanManager().newSubScope();
-        subScope.register(Translator.class, TransLoader.loadTranslate(jp));
+        subScope.register(Translator.class, TransLoader.LOADER.loadTranslate(jp));
         return subScope;
     }
 
