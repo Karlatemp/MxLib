@@ -13,6 +13,8 @@ package io.github.karlatemp.mxlib.command;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,4 +45,15 @@ public interface ICommand {
     }
 
     CommandProvider provider();
+
+    default void invoke(Object sender, String label, List<String> arguments) {
+        invoke(sender, label, new ArrayList<>(arguments), arguments);
+    }
+
+    default List<String> tabCompile(Object sender, @NotNull List<String> args) {
+        List<String> result = new LinkedList<>();
+        tabCompile(sender, result, args, new ArrayList<>(args));
+        return result;
+    }
+
 }
