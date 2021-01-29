@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class SimpleJarScanner implements IJarScanner, ContextBean {
     @Inject
@@ -72,12 +73,13 @@ public class SimpleJarScanner implements IJarScanner, ContextBean {
             try {
                 Iterator<Path> iterator;
                 Path root;
+                Stream<Path> csStr;
                 if (Files.isDirectory(path)) {
                     root = path;
-                    iterator = Files.walk(path).iterator();
+                    iterator = (csStr = Files.walk(path)).iterator();
                 } else {
                     fsToClose = FileSystems.newFileSystem(URI.create("jar:" + path.toUri().toString()), Collections.emptyMap());
-                    iterator = Files.walk(root = fsToClose.getPath("/")).iterator();
+                    iterator = (csStr = Files.walk(root = fsToClose.getPath("/"))).iterator();
                 }
                 for (Path p : new IteratorSupplier<>(iterator)) {
 
@@ -88,6 +90,7 @@ public class SimpleJarScanner implements IJarScanner, ContextBean {
                         list.add(pw.substring(0, pw.length() - 6));
                     }
                 }
+                csStr.close();
             } finally {
                 if (fsToClose != null) fsToClose.close();
             }
