@@ -53,7 +53,7 @@ public abstract class AwesomeLogger extends AbstractLogger {
         return true;
     }
 
-    public boolean isEnabled(Level leve) {
+    public boolean isEnabled(Level level) {
         return true;
     }
 
