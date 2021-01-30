@@ -234,7 +234,15 @@ public class MinecraftProtocolHelper {
                                     @Override
                                     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                                         if (msg instanceof ByteBuf) {
-                                            PacketDataSerializer serializer = PacketDataSerializer.fromByteBuf((ByteBuf) msg);
+                                            channelRead0(ctx, (ByteBuf) msg);
+                                        } else {
+                                            super.channelRead(ctx, msg);
+                                        }
+                                    }
+
+                                    private void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
+                                        try {
+                                            PacketDataSerializer serializer = PacketDataSerializer.fromByteBuf(msg);
                                             int pid = serializer.readVarInt();
                                             if (step == 0) { // Reading status
                                                 if (pid != 0) {
@@ -260,9 +268,9 @@ public class MinecraftProtocolHelper {
                                             } else { // assertion error
                                                 throw new IOException("Assertion exception: step=" + step);
                                             }
-                                            return;
+                                        } finally {
+                                            msg.release();
                                         }
-                                        super.channelRead(ctx, msg);
                                     }
 
                                     @Override
