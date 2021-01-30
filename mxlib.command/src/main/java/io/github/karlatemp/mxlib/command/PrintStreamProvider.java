@@ -11,14 +11,24 @@
 
 package io.github.karlatemp.mxlib.command;
 
+import io.github.karlatemp.mxlib.translate.Translator;
 import io.github.karlatemp.mxlib.utils.StringBuilderFormattable;
 
 import java.io.PrintStream;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PrintStreamProvider extends io.github.karlatemp.mxlib.command.BaseCommandProvider {
     public PrintStreamProvider(CommandProvider parent) {
         super(parent);
+    }
+
+    public PrintStreamProvider(CommandProvider parent, Translator translator) {
+        super(parent, translator);
+    }
+
+    public PrintStreamProvider(CommandProvider parent, Translator translator, Logger logger) {
+        super(parent, translator, logger);
     }
 
     @Override
