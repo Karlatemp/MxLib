@@ -399,9 +399,10 @@ public class DefaultCommand implements ICommand {
         }
 
         Object[] args = new Object[method.getParameterCount()];
+        List<String> unParsed = (List<String>) p.value(options.getNoSpec());
         for (int i = 0; i < args.length; i++) {
             args[i] = this.solts[i].get(
-                    sender, p, (List<String>) p.value(options.getNoSpec()), arguments,
+                    sender, p, unParsed, arguments,
                     fillArguments, label);
         }
         try {
