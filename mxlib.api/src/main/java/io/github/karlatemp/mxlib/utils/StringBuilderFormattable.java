@@ -20,7 +20,42 @@ import java.util.function.Supplier;
 public interface StringBuilderFormattable {
     static StringBuilderFormattable LN = by("\n");
     static StringBuilderFormattable LT = by("\t");
-    static StringBuilderFormattable EMPTY = $ -> {
+    static StringBuilderFormattable NULL = by("null");
+    static StringBuilderFormattable EMPTY = new StringBuilderFormattable() {
+        @Override
+        public void formatTo(@NotNull StringBuilder builder) {
+        }
+
+        @Override
+        public String to_string() {
+            return "";
+        }
+
+        @Override
+        public String toString() {
+            return "";
+        }
+
+        @Override
+        public @NotNull StringBuilderFormattable.Link asLink() {
+            return new Link();
+        }
+
+        @Override
+        public @NotNull StringBuilderFormattable plusMsg(@NotNull Object next) {
+            if (next instanceof StringBuilderFormattable) return (StringBuilderFormattable) next;
+            return byLazyToString(next);
+        }
+
+        @Override
+        public @NotNull Object lazyToStringBridge() {
+            return this;
+        }
+
+        @Override
+        public StringBuilderFormattable copy() {
+            return this;
+        }
     };
 
     void formatTo(@NotNull StringBuilder builder);
@@ -45,6 +80,9 @@ public interface StringBuilderFormattable {
     }
 
     static StringBuilderFormattable byLazyToString(Object any) {
+        if (any == null) return NULL;
+        if (any instanceof StringBuilderFormattable) return (StringBuilderFormattable) any;
+
         return new StringBuilderFormattable() {
             @Override
             public void formatTo(@NotNull StringBuilder builder) {
@@ -68,6 +106,12 @@ public interface StringBuilderFormattable {
     }
 
     static StringBuilderFormattable by(CharSequence charSequence) {
+        if (charSequence == null) {
+            return NULL;
+        }
+        if (charSequence instanceof String && charSequence.length() == 0) {
+            return EMPTY;
+        }
         return new StringBuilderFormattable() {
             @Override
             public void formatTo(@NotNull StringBuilder builder) {
@@ -100,7 +144,7 @@ public interface StringBuilderFormattable {
 
             @Override
             public String toString() {
-                return supplier.get().toString();
+                return String.valueOf(supplier.get());
             }
 
             @Override
@@ -133,6 +177,7 @@ public interface StringBuilderFormattable {
         public @NotNull StringBuilderFormattable plusMsg(
                 @NotNull Object next_
         ) {
+            if (next_ == EMPTY) return this;
             list.add(next_);
             return this;
         }
@@ -160,6 +205,20 @@ public interface StringBuilderFormattable {
     }
 
     static StringBuilderFormattable by(CharSequence charSequence, int start, int end) {
+        if (charSequence == null) {
+            if (start == 0) {
+                if (end == 0) {
+                    return EMPTY;
+                }
+                if (end < 0) {
+                    return NULL;
+                }
+            }
+            throw new NullPointerException("charSequence");
+        }
+        if (start == end) {
+            return EMPTY;
+        }
         return new StringBuilderFormattable() {
             @Override
             public void formatTo(@NotNull StringBuilder builder) {
@@ -186,6 +245,7 @@ public interface StringBuilderFormattable {
     default @NotNull StringBuilderFormattable plusMsg(
             @NotNull Object next
     ) {
+        if (next == EMPTY) return this;
         Link link = new Link();
         link.list.add(this);
         link.list.add(next);
