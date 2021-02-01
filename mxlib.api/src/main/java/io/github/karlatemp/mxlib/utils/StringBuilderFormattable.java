@@ -11,16 +11,41 @@
 
 package io.github.karlatemp.mxlib.utils;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * Objects that implement this interface can be converted to text,
+ * ideally without allocating temporary objects.
+ *
+ * @apiNote Always use {@link #to_string()} not {@link #toString()}
+ */
 public interface StringBuilderFormattable {
+    /**
+     * Constant {@code "\n"}
+     */
+    @NotNull
     static StringBuilderFormattable LN = by("\n");
+    /**
+     * Constant {@code "\t"}
+     */
+    @NotNull
     static StringBuilderFormattable LT = by("\t");
+    /**
+     * Constant {@code "null"}
+     *
+     * @since 3.0-dev-15
+     */
+    @NotNull
     static StringBuilderFormattable NULL = by("null");
+    /**
+     * Constant {@code ""}
+     */
+    @NotNull
     static StringBuilderFormattable EMPTY = new StringBuilderFormattable() {
         @Override
         public void formatTo(@NotNull StringBuilder builder) {
@@ -58,8 +83,20 @@ public interface StringBuilderFormattable {
         }
     };
 
+    /**
+     * Writes a text representation of this object into the specified {@code StringBuilder}, ideally without allocating
+     * temporary objects.
+     *
+     * @param builder the StringBuilder to write into
+     */
     void formatTo(@NotNull StringBuilder builder);
 
+    /**
+     * Returns the string representation of the Object argument.
+     *
+     * @see #formatTo(StringBuilder)
+     * @see String#valueOf(Object)
+     */
     static String toString(Object object) {
         if (object instanceof StringBuilderFormattable) {
             StringBuilder builder = new StringBuilder();
@@ -69,6 +106,9 @@ public interface StringBuilderFormattable {
         return String.valueOf(object);
     }
 
+    /**
+     * Append a value into StringBuilder
+     */
     static void append(@NotNull StringBuilder builder, Object value) {
         if (value instanceof StringBuilderFormattable) {
             ((StringBuilderFormattable) value).formatTo(builder);
@@ -79,6 +119,11 @@ public interface StringBuilderFormattable {
         }
     }
 
+    /**
+     * Get {@link StringBuilderFormattable} from any object
+     */
+    @Contract(pure = true)
+    @NotNull
     static StringBuilderFormattable byLazyToString(Object any) {
         if (any == null) return NULL;
         if (any instanceof StringBuilderFormattable) return (StringBuilderFormattable) any;
@@ -101,15 +146,27 @@ public interface StringBuilderFormattable {
         };
     }
 
+    /**
+     * Returns the string representation of the Object argument.
+     * <p>
+     * Use this method for toString not {@link #toString()}
+     */
     default String to_string() {
         return toString(this);
     }
 
+    /**
+     * Get {@link StringBuilderFormattable} by a {@link CharSequence}
+     */
+    @Contract(pure = true)
+    @NotNull
     static StringBuilderFormattable by(CharSequence charSequence) {
         if (charSequence == null) {
+            //noinspection ConstantConditions
             return NULL;
         }
         if (charSequence instanceof String && charSequence.length() == 0) {
+            //noinspection ConstantConditions
             return EMPTY;
         }
         return new StringBuilderFormattable() {
@@ -135,6 +192,11 @@ public interface StringBuilderFormattable {
         };
     }
 
+    /**
+     * Get {@link StringBuilderFormattable} by a {@link Supplier<String>}
+     */
+    @Contract(pure = true)
+    @NotNull
     static StringBuilderFormattable by(Supplier<CharSequence> supplier) {
         return new StringBuilderFormattable() {
             @Override
@@ -159,6 +221,9 @@ public interface StringBuilderFormattable {
         };
     }
 
+    /**
+     * A link that with many contents
+     */
     static class Link implements StringBuilderFormattable {
         protected List<Object> list = new ArrayList<>();
 
@@ -173,6 +238,11 @@ public interface StringBuilderFormattable {
             }
         }
 
+        /**
+         * Add a content into this link.
+         *
+         * @return this
+         */
         @Override
         public @NotNull StringBuilderFormattable plusMsg(
                 @NotNull Object next_
@@ -192,6 +262,9 @@ public interface StringBuilderFormattable {
             return to_string();
         }
 
+        /**
+         * Copy a new link
+         */
         public Link copy() {
             Link l = new Link();
             l.list.addAll(list);
@@ -204,6 +277,9 @@ public interface StringBuilderFormattable {
         }
     }
 
+    /**
+     * Get {@link StringBuilderFormattable} by a {@link CharSequence}
+     */
     static StringBuilderFormattable by(CharSequence charSequence, int start, int end) {
         if (charSequence == null) {
             if (start == 0) {
@@ -242,6 +318,14 @@ public interface StringBuilderFormattable {
         };
     }
 
+    /**
+     * Plus a content
+     *
+     * @apiNote If this is a {@link Link}, content will be plus into this and return this
+     * @see #copy()
+     * @see Link#plusMsg(Object)
+     * @see Link
+     */
     default @NotNull StringBuilderFormattable plusMsg(
             @NotNull Object next
     ) {
@@ -252,16 +336,28 @@ public interface StringBuilderFormattable {
         return link;
     }
 
+    /**
+     * Convert this into a {@link Link}
+     */
     default @NotNull StringBuilderFormattable.Link asLink() {
         Link link = new Link();
         link.list.add(this);
         return link;
     }
 
+    /**
+     * Copy a new link
+     *
+     * @apiNote No effect if this is not a link
+     */
     default StringBuilderFormattable copy() {
         return this;
     }
 
+    /**
+     * Get a object that {@link Object#toString()} returns {@link #to_string()}
+     */
+    @Contract(pure = true)
     default @NotNull Object lazyToStringBridge() {
         return new Object() {
             @Override
