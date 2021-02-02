@@ -13,11 +13,10 @@ package io.github.karlatemp.mxlib.logger;
 
 import io.github.karlatemp.mxlib.utils.StringBuilderFormattable;
 
-import java.lang.management.LockInfo;
 import java.lang.management.ThreadInfo;
 
 /**
- * 日志信息格式化工厂
+ * The message factory for {@link io.github.karlatemp.mxlib.logger.renders.SimpleRender}
  */
 public interface MessageFactory {
     StringBuilderFormattable getStackTraceElementMessage(StackTraceElement stack);

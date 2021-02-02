@@ -18,6 +18,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.management.ThreadInfo;
 
+/**
+ * The basic MessageFactory
+ */
 public class BasicMessageFactory implements MessageFactory {
     @Override
     public StringBuilderFormattable getStackTraceElementMessage(StackTraceElement stack) {

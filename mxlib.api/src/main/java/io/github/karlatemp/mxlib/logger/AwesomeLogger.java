@@ -17,11 +17,42 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/**
+ * The awesome logger
+ * <p>
+ * By default, all logging levels are enabled.
+ * Disabling some level by overriding {@link #isEnabled(Level)}
+ */
 public abstract class AwesomeLogger extends AbstractLogger {
+    /**
+     * The awesome logger
+     * <p>
+     * By default, all logging levels are enabled.
+     * Disabling some level by overriding {@link #isEnabled(Level)}
+     */
     public static class Awesome extends AwesomeLogger {
         private final Consumer<StringBuilder> printer;
         private final String name;
 
+        /**
+         * Construct {@link Awesome}
+         *
+         * <pre>{@code
+         * MessageRender render = new PrefixedRender(
+         *     new SimpleRender(new BasicMessageFactory()),
+         *     PrefixedRender.PrefixSupplier.dated("yyyy-MM-dd HH:mm:ss ")
+         * );
+         * Consumer<StringBuilder> printer = System.out::println;
+         *
+         * MLogger topLevel = new AwesomeLogger.Awesome("TopLevel", printer, render);
+         * MxLib.setLogger(topLevel);
+         * MxLib.setLoggerFactory(name -> new AwesomeLogger.Awesome(name, printer, render));
+         * }</pre>
+         *
+         * @param name    The logger name
+         * @param printer The message finally printer
+         * @param render  The message render
+         */
         public Awesome(String name, Consumer<StringBuilder> printer, MessageRender render) {
             this.render = render;
             this.printer = printer;

@@ -18,7 +18,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/**
+ * Message Render
+ *
+ * @see io.github.karlatemp.mxlib.logger.renders.PrefixedRender
+ * @see io.github.karlatemp.mxlib.logger.renders.SimpleRender
+ */
 public interface MessageRender {
+    /**
+     * Render a message
+     */
     @NotNull StringBuilder render(
             @Nullable String loggerName,
             @Nullable MMarket market,

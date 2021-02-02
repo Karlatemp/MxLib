@@ -37,6 +37,9 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+/**
+ * Improved MessageFactory
+ */
 @SuppressWarnings("unchecked")
 public class RawMessageFactory implements MessageFactory {
     protected static final StringBuilderFormattable SUPPRESSED_CAPTION = StringBuilderFormattable.by(

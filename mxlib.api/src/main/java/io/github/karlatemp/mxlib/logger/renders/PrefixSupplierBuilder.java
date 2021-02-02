@@ -17,6 +17,23 @@ import org.jetbrains.annotations.NotNull;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Supplier;
 
+/**
+ * The builder for building {@link PrefixSupplier}
+ *
+ * <pre>{@code
+ * PrefixSupplier supplier = new PrefixSupplierBuilder()
+ *                 .append(StringUtils.BkColors._B)
+ *                 .dated(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+ *                 .append(" " + StringUtils.BkColors._5)
+ *                 .dated(DateTimeFormatter.ofPattern("HH:mm:ss"))
+ *                 .append(StringUtils.BkColors.RESET + " [" + StringUtils.BkColors._6)
+ *                 .loggerName().aligned(PrefixedRender.AlignedSupplier.AlignType.LEFT)
+ *                 .append(StringUtils.BkColors.RESET + "] [" + StringUtils.BkColors._B)
+ *                 .loggerLevel().aligned(PrefixedRender.AlignedSupplier.AlignType.CENTER)
+ *                 .append(StringUtils.BkColors.RESET + "] ")
+ *                 .complete()
+ * }</pre>
+ */
 public class PrefixSupplierBuilder {
     protected PrefixSupplier current;
     protected PrefixSupplier last;

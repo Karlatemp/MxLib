@@ -23,6 +23,11 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
+/**
+ * Standard message render
+ *
+ * @see PrefixedRender
+ */
 public class SimpleRender implements MessageRender {
     private final MessageFactory factory;
     private static final SimpleFormatter SIMPLE_FORMATTER = new SimpleFormatter();

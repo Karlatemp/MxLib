@@ -26,15 +26,45 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/**
+ * MessageRender with prefix
+ *
+ * <pre>{@code
+ * MessageRender render = new PrefixedRender(
+ *     new SimpleRender(new BasicMessageFactory()),
+ *     PrefixedRender.PrefixSupplier.constant(StringUtils.BkColors._B)
+ *         .plus(PrefixedRender.PrefixSupplier.dated(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
+ *         .plus(" " + StringUtils.BkColors._5)
+ *         .plus(PrefixedRender.PrefixSupplier.dated(DateTimeFormatter.ofPattern("HH:mm:ss")))
+ *         .plus(StringUtils.BkColors.RESET + " [" + StringUtils.BkColors._6)
+ *         .plus(PrefixedRender.PrefixSupplier.loggerName().aligned(PrefixedRender.AlignedSupplier.AlignType.LEFT))
+ *         .plus(StringUtils.BkColors.RESET + "] [" + StringUtils.BkColors._B)
+ *         .plus(PrefixedRender.PrefixSupplier.loggerLevel().aligned(PrefixedRender.AlignedSupplier.AlignType.CENTER))
+ *         .plus(StringUtils.BkColors.RESET + "] ")
+ * );
+ * }</pre>
+ */
 public class PrefixedRender implements MessageRender {
     private final PrefixSupplier prefixSupplier;
     private final MessageRender render;
 
+    /**
+     * The supplier for getting message prefix
+     * <p>
+     * The result of {@link #rendPrefix(String, MMarket, StringBuilder, boolean, Level, LogRecord)}
+     * will be insert to start in
+     * {@link PrefixedRender#render(String, MMarket, StringBuilderFormattable, boolean, Level, LogRecord)}
+     *
+     * @see PrefixSupplierBuilder
+     */
     public interface PrefixSupplier {
+        /**
+         * A empty {@link PrefixSupplier}
+         */
         PrefixSupplier EMPTY = new PrefixSupplier() {
             @Override
             public @NotNull CharSequence rendPrefix(@Nullable String loggerName, @Nullable MMarket market, @NotNull StringBuilder content, boolean isError, @Nullable Level level, @Nullable LogRecord record) {
-                return new StringBuilder();
+                return "";
             }
 
             @Override
@@ -58,6 +88,13 @@ public class PrefixedRender implements MessageRender {
             }
         };
 
+        /**
+         * Calculate the prefix of this logging.
+         * <p>
+         * This method will be called in logging a message. Don't take processing too long
+         * <p>
+         * Don't contains {@code "\n"} in result, else will get wrong output
+         */
         @NotNull CharSequence rendPrefix(
                 @Nullable String loggerName,
                 @Nullable MMarket market,
@@ -93,26 +130,44 @@ public class PrefixedRender implements MessageRender {
             return (loggerName, market, content, isError, level, record) -> supplier.get();
         }
 
+        /**
+         * A {@link PrefixSupplier} returns system current time with a {@link DateTimeFormatter}
+         */
         static @NotNull PrefixSupplier dated(@NotNull DateTimeFormatter formatter) {
             return new DatedSupplier(formatter);
         }
 
+        /**
+         * A {@link PrefixSupplier} returns first argument of {@link #rendPrefix(String, MMarket, StringBuilder, boolean, Level, LogRecord)}
+         */
         static @NotNull PrefixSupplier loggerName() {
             return PrefixSupplierInternal.LoggerName.I;
         }
 
+        /**
+         * A {@link PrefixSupplier} returns the record logger name
+         */
         static @NotNull PrefixSupplier loggerAndRecordName() {
             return PrefixSupplierInternal.LoggerName.LRC;
         }
 
+        /**
+         * A {@link PrefixSupplier} returns the message level
+         */
         static @NotNull PrefixSupplier loggerLevel() {
             return PrefixSupplierInternal.LevelSup.I;
         }
 
+        /**
+         * Return a center aligned {@link PrefixSupplier}
+         */
         default @NotNull PrefixSupplier aligned() {
             return AlignedSupplier.by(this);
         }
 
+        /**
+         * Return a aligned {@link PrefixSupplier}
+         */
         default @NotNull PrefixSupplier aligned(@Nullable AlignedSupplier.AlignType type) {
             return AlignedSupplier.by(this, type);
         }

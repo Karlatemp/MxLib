@@ -21,6 +21,9 @@ import java.lang.management.LockInfo;
 
 import static io.github.karlatemp.mxlib.utils.StringBuilderFormattable.by;
 
+/**
+ * MessageFactory with Ansi colors
+ */
 public class AnsiMessageFactory extends RawMessageFactory {
     public static final StringBuilderFormattable
             _0 = by(StringUtils.BkColors._0),

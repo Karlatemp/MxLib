@@ -30,6 +30,22 @@ public open class PrefixSupplierBuilderKt : PrefixSupplierBuilder {
     }
 }
 
+/**
+ * DSL for building [PrefixedRender.PrefixSupplier]
+ *
+ * ```kotlin
+ * buildPrefixSupplier(PrefixSupplier.constant(StringUtils.BkColors._B)) {
+ *      +PrefixSupplier.dated(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+ *      +(" " + StringUtils.BkColors._5)
+ *      +PrefixSupplier.dated(DateTimeFormatter.ofPattern("HH:mm:ss"))
+ *      +(StringUtils.BkColors.RESET + " [" + StringUtils.BkColors._6)
+ *      +PrefixSupplier.loggerAndRecordName().aligned(PrefixedRender.AlignedSupplier.AlignType.LEFT)
+ *      +(StringUtils.BkColors.RESET + "] [" + StringUtils.BkColors._B)
+ *      +PrefixSupplier.loggerLevel().aligned(PrefixedRender.AlignedSupplier.AlignType.CENTER)
+ *      +(StringUtils.BkColors.RESET + "] ")
+ * }
+ * ```
+ */
 public inline fun buildPrefixSupplier(
     current: PrefixedRender.PrefixSupplier = PrefixedRender.PrefixSupplier.EMPTY,
     block: PrefixSupplierBuilderKt.() -> Unit,
