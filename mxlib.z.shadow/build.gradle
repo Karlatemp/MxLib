@@ -12,6 +12,7 @@
 import java.nio.file.Files
 
 plugins {
+    id 'io.github.karlatemp.publication-sign' version '1.0.0'
     id 'com.jfrog.bintray' version '1.8.5'
     id("maven-publish")
 }
@@ -74,6 +75,39 @@ def allPublishs = new ArrayList<String>()
 def zshadowProj = project
 
 publishing {
+    repositories {
+        maven {
+            // Maven Central
+            setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+
+            credentials {
+                username = rootProject.property('sonatype.user')
+                password = rootProject.property('sonatype.key')
+            }
+
+            metadataSources.ignoreGradleMetadataRedirection()
+        }
+
+        mavenLocal {
+            metadataSources.ignoreGradleMetadataRedirection()
+        }
+
+        maven {
+
+            def user = project.findProperty("bintray.user") ?: System.getenv("USERNAME")
+            def key = project.findProperty('bintray.key') ?: System.getenv("TOKEN")
+
+            setUrl("https://api.bintray.com/maven/$user/misc/MxLib/;publish=1;override=1")
+
+            credentials {
+                username = user
+                password = key
+            }
+
+            metadataSources.ignoreGradleMetadataRedirection()
+        }
+    }
+
     publications { container ->
         projects.forEach { proj ->
             def ppid = "publish_${proj.name}".replace(".", "_")
@@ -87,6 +121,7 @@ publishing {
                 if (sources instanceof Jar) {
                     publication.artifact sources
                 }
+                publication.setModuleDescriptorGenerator(null)
 
                 publication.pom {
                     name = 'MxLib - ' + proj.name
@@ -102,6 +137,12 @@ publishing {
             }
 
         }
+    }
+}
+
+publicationSign {
+    setupWorkflow { workflow ->
+        workflow.fastSetup("keys/key.pub", "keys/key.pri")
     }
 }
 
