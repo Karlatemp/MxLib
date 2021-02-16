@@ -82,7 +82,7 @@ public class LambdaFactory {
                         MethodType.methodType(interfaceClass),
                         methodType,
                         handle,
-                        methodType
+                        handle.type()
                 );
             } catch (LambdaConversionException e) {
                 throw new IllegalArgumentException(e);
