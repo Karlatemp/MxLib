@@ -221,6 +221,11 @@ public interface StringBuilderFormattable {
         };
     }
 
+    @Contract(pure = true, value = "null -> null; !null -> !null")
+    static StringBuilderFormattable by(StringBuilderFormattable msg) {
+        return msg;
+    }
+
     /**
      * A link that with many contents
      */

@@ -29,7 +29,7 @@ public interface LineWriter {
     void println(String line);
 
     default void println(Object line) {
-        println(String.valueOf(line));
+        println(StringBuilderFormattable.toString(line));
     }
 
     @Contract("null -> null")
