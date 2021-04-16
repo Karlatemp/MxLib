@@ -12,13 +12,13 @@
 import java.nio.file.Files
 
 plugins {
-    id 'io.github.karlatemp.publication-sign' version '1.0.0'
-    id 'com.jfrog.bintray' version '1.8.5'
+    id 'io.github.karlatemp.publication-sign' version '1.1.0'
     id("maven-publish")
 }
 
 def projects = new ArrayList<>(rootProject.subprojects)
 projects.remove(project)
+projects.remove(rootProject)
 projects.removeIf { proj -> proj.name.contains("shadowjar") }
 projects.removeIf { it.name == "mxlib.z.srx.debug" }
 
@@ -28,9 +28,11 @@ projects.forEach { proj ->
         tsk.classifier = 'sources'
         tsk.from proj.sourceSets.main.allSource
     }
+    proj.tasks.create("javadocJar", Jar.class) { tsk ->
+        tsk.archiveClassifier.set('javadocs')
+    }
 }
 
-def root = rootProject
 
 task collectJars() {
     def tasks = new ArrayList<Jar>()
@@ -72,11 +74,11 @@ task collectJars() {
 }
 
 def allPublishs = new ArrayList<String>()
-def zshadowProj = project
 
 publishing {
     repositories {
         maven {
+            setName("MavenCentral")
             // Maven Central
             setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2")
 
@@ -92,20 +94,6 @@ publishing {
             metadataSources.ignoreGradleMetadataRedirection()
         }
 
-        maven {
-
-            def user = project.findProperty("bintray.user") ?: System.getenv("USERNAME")
-            def key = project.findProperty('bintray.key') ?: System.getenv("TOKEN")
-
-            setUrl("https://api.bintray.com/maven/$user/misc/MxLib/;publish=1;override=1")
-
-            credentials {
-                username = user
-                password = key
-            }
-
-            metadataSources.ignoreGradleMetadataRedirection()
-        }
     }
 
     publications { container ->
@@ -118,8 +106,12 @@ publishing {
                 publication.from(proj.components.java)
 
                 def sources = proj.tasks.findByName('sourcesJar')
+                def javadoc = proj.tasks.findByName('javadocJar')
                 if (sources instanceof Jar) {
                     publication.artifact sources
+                }
+                if (javadoc instanceof Jar) {
+                    publication.artifact javadoc
                 }
                 publication.setModuleDescriptorGenerator(null)
 
@@ -133,6 +125,16 @@ publishing {
                             url = 'https://spdx.org/licenses/MIT.html'
                         }
                     }
+                    developers {
+                        developer {
+                            name = 'Karlatemp'
+                            email = 'karlatemp@vip.qq.com'
+                        }
+                    }
+                    scm {
+                        url = 'https://github.com/Karlatemp/MxLib.git'
+                        connection = 'https://github.com/Karlatemp/MxLib.git'
+                    }
                 }
             }
 
@@ -143,27 +145,5 @@ publishing {
 publicationSign {
     setupWorkflow { workflow ->
         workflow.fastSetup("keys/key.pub", "keys/key.pri")
-    }
-}
-
-bintray {
-    publications = allPublishs
-
-    user = project.findProperty("bintray.user") ?: System.getenv("USERNAME")
-    key = project.findProperty('bintray.key') ?: System.getenv("TOKEN")
-
-    override = true
-    publish = true
-
-    pkg {
-        repo = 'misc'
-        name = rootProject.name
-        licenses = ['MIT']
-        vcsUrl = 'https://github.com/Karlatemp/MxLib.git'
-        version {
-            name = project.version
-            desc = project.version
-            released = new Date()
-        }
     }
 }
