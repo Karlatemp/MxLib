@@ -12,20 +12,22 @@
 package io.github.karlatemp.mxlib.spigot;
 
 import io.github.karlatemp.unsafeaccessor.Root;
+import org.bukkit.entity.Player;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 
-import static io.github.karlatemp.mxlib.spigot.NmsHelper.getNmsClass;
-import static io.github.karlatemp.mxlib.spigot.NmsHelper.throwx;
+import static io.github.karlatemp.mxlib.spigot.NmsHelper.*;
 
 public class PlayerHelper {
 
     private static final Class<?> EntityPlayer = getNmsClass("EntityPlayer");
+    private static final Class<?> CraftPlayer = getObcClass("entity.CraftPlayer");
     private static final Class<?> PlayerConnection = getNmsClass("PlayerConnection");
     private static final Class<?> Packet = getNmsClass("Packet");
     private static final MethodHandle EntityPlayer$playerConnection;
     private static final MethodHandle PlayerConnection$sendPacket;
+    private static final MethodHandle CraftPlayer$getProfile;
 
     static {
         try {
@@ -35,6 +37,9 @@ public class PlayerHelper {
             );
             PlayerConnection$sendPacket = trusted.unreflect(
                     PlayerConnection.getDeclaredMethod("sendPacket", Packet)
+            );
+            CraftPlayer$getProfile = trusted.unreflect(
+                    CraftPlayer.getDeclaredMethod("getProfile")
             );
         } catch (Throwable throwable) {
             throw new ExceptionInInitializerError(throwable);
@@ -57,4 +62,11 @@ public class PlayerHelper {
         }
     }
 
+    public static Object getProfile(Player player) {
+        try {
+            return CraftPlayer$getProfile.invoke(player);
+        } catch (Throwable throwable) {
+            return throwx(throwable);
+        }
+    }
 }
