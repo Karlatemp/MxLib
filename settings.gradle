@@ -21,6 +21,7 @@ def imports(String... projects) {
 
 imports(
         'mxlib.annotation',
+        'mxlib.security',
         'mxlib.api',
         'mxlib.api.kotlin',
         'mxlib.common',
