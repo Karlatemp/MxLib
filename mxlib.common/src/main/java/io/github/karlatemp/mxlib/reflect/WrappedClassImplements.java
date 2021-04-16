@@ -11,6 +11,7 @@
 
 package io.github.karlatemp.mxlib.reflect;
 
+import io.github.karlatemp.mxlib.utils.Toolkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.*;
@@ -293,7 +294,7 @@ public class WrappedClassImplements {
     public static String genImplementClassName(String package_, String name) {
         if (name == null) {
             if (package_ == null) {
-                package_ = "cn/mcres/karlatemp/mxlib/internal/implements/";
+                package_ = "io/github/karlatemp/mxlib/internal/implements/";
             }
             if (!package_.endsWith("/")) {
                 package_ += '/';
@@ -315,6 +316,58 @@ public class WrappedClassImplements {
             return genImplementClassName(null, null);
         }
         return name;
+    }
+
+    /**
+     * @since 3.0-dev-16
+     */
+    public static ClassWriter genDelegate(String classname, Class<?> interfaceClass) {
+        if (classname == null) {
+            classname = genImplementClassName(Toolkit.getPackageByClassName(interfaceClass.getName()), null);
+        }
+        classname = classname.replace('.', '/');
+        ClassWriter writer = new ClassWriter(0);
+        String interfaceName = interfaceClass.getName().replace('.', '/');
+        String interfaceType = "L" + interfaceName + ";";
+
+        writer.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, classname, null, "java/lang/Object", new String[]{
+                interfaceName
+        });
+        MethodVisitor init = writer.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "(" + interfaceType + ")V", null, null);
+        init.visitVarInsn(Opcodes.ALOAD, 0);
+        init.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
+        init.visitVarInsn(Opcodes.ALOAD, 0);
+        init.visitVarInsn(Opcodes.ALOAD, 1);
+        init.visitFieldInsn(Opcodes.PUTFIELD, classname, "delegate", interfaceType);
+        init.visitInsn(Opcodes.RETURN);
+        init.visitMaxs(2, 2);
+
+        writer.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL, "delegate", interfaceType, null, null);
+
+        for (Method m : interfaceClass.getMethods()) {
+            if (Modifier.isStatic(m.getModifiers())) continue;
+            String desc = Type.getMethodDescriptor(m);
+            MethodVisitor method = writer.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL, m.getName(), desc, null, null);
+            method.visitVarInsn(Opcodes.ALOAD, 0);
+            method.visitFieldInsn(Opcodes.GETFIELD, classname, "delegate", interfaceType);
+
+            int counter = 1;
+            for (Type t : Type.getArgumentTypes(desc)) {
+                method.visitVarInsn(t.getOpcode(Opcodes.ILOAD), counter);
+                counter += t.getSize();
+            }
+
+            if (m.getDeclaringClass().isInterface()) {
+                method.visitMethodInsn(Opcodes.INVOKEINTERFACE, m.getDeclaringClass().getName().replace('.', '/'), m.getName(), desc, true);
+            } else {
+                method.visitMethodInsn(Opcodes.INVOKESPECIAL, m.getDeclaringClass().getName().replace('.', '/'), m.getName(), desc, false);
+            }
+
+            method.visitInsn(Type.getReturnType(desc).getOpcode(Opcodes.IRETURN));
+            method.visitMaxs(counter, counter);
+        }
+
+        return writer;
     }
 
     public enum MethodWrapperType {
