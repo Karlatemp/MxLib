@@ -11,6 +11,7 @@
 
 plugins {
     id 'java'
+    id 'java-library'
 }
 
 repositories {
@@ -19,9 +20,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':mxlib-annotation')
-    implementation project(':mxlib-api')
-    implementation project(':mxlib-common')
+    api project(':mxlib-common')
 
-    compile 'com.mojang:brigadier:1.0.17'
+    api 'com.mojang:brigadier:1.0.17'
 }

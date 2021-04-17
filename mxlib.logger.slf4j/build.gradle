@@ -11,13 +11,11 @@
 
 plugins {
     id 'java'
+    id 'java-library'
 }
 
 dependencies {
-    implementation project(':mxlib-annotation')
-    implementation project(':mxlib-api')
-    implementation project(':mxlib-common')
-    implementation project(':mxlib-logger')
+    api project(':mxlib-logger')
 
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api

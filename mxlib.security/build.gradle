@@ -11,9 +11,8 @@
 
 plugins {
     id 'java'
+    id 'java-library'
 }
 dependencies {
-    implementation project(':mxlib-annotation')
-    implementation project(':mxlib-api')
-    implementation project(':mxlib-common')
+    api project(':mxlib-common')
 }

@@ -11,18 +11,15 @@
 
 plugins {
     id 'java'
+    id 'java-library'
 }
 
 dependencies {
-    implementation project(':mxlib-annotation')
-    implementation project(':mxlib-api')
-    implementation project(':mxlib-common')
-    implementation project(':mxlib-logger')
-    implementation project(':mxlib-nbt')
-    implementation project(':mxlib-network')
-    implementation project(':mxlib-network-mc')
-    implementation project(':mxlib-network-cs')
-    implementation project(':mxlib-command')
+    api project(':mxlib-logger')
+    api project(':mxlib-nbt')
+    api project(':mxlib-network-mc')
+    api project(':mxlib-network-cs')
+    api project(':mxlib-command')
 
     compileOnly "org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT"
 }

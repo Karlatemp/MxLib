@@ -10,6 +10,7 @@
  */
 
 import java.nio.file.Files
+import io.github.karlatemp.publicationsign.impl.ArtifactSignTask
 
 plugins {
     id 'io.github.karlatemp.publication-sign' version '1.1.0'
@@ -29,7 +30,7 @@ projects.forEach { proj ->
         tsk.from proj.sourceSets.main.allSource
     }
     proj.tasks.create("javadocJar", Jar.class) { tsk ->
-        tsk.archiveClassifier.set('javadocs')
+        tsk.archiveClassifier.set('javadoc')
     }
 }
 
@@ -145,5 +146,11 @@ publishing {
 publicationSign {
     setupWorkflow { workflow ->
         workflow.fastSetup("keys/key.pub", "keys/key.pri")
+    }
+}
+
+task signAllArtifacts() {
+    tasks.matching { it instanceof ArtifactSignTask }.each {
+        dependsOn(it)
     }
 }

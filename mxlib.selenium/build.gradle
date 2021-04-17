@@ -11,17 +11,15 @@
 
 plugins {
     id 'java'
+    id 'java-library'
 }
 
 dependencies {
-    implementation project(':mxlib-annotation')
-    implementation project(':mxlib-api')
-    implementation project(':mxlib-common')
-    implementation project(':mxlib-network')
+    api project(':mxlib-network')
 
     // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
-    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.0.0-alpha-7'
+    api group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '4.0.0-alpha-7'
 
-    compile 'org.codehaus.plexus:plexus-archiver:2.2'
+    api 'org.codehaus.plexus:plexus-archiver:2.2'
 }
 

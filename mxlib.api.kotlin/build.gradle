@@ -11,11 +11,11 @@
 
 plugins {
     id 'java'
+    id 'java-library'
     id 'org.jetbrains.kotlin.jvm'
     id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 dependencies {
-    implementation project(':mxlib-annotation')
-    implementation project(':mxlib-api')
+    api project(':mxlib-api')
 }

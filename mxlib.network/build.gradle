@@ -11,16 +11,15 @@
 
 plugins {
     id 'java'
+    id 'java-library'
 }
 
 dependencies {
-    implementation project(':mxlib-annotation')
-    implementation project(':mxlib-api')
-    implementation project(':mxlib-common')
+    api project(':mxlib-common')
 
     // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
-    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
+    api group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
 
-    compile 'io.netty:netty-all:4.1.53.Final'
+    api 'io.netty:netty-all:4.1.53.Final'
 
 }
