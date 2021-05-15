@@ -36,8 +36,8 @@ jobs:
           SECRET_DATA: ${{ secrets.SECRET_DATA }}
 
       - name: Build
-        run: ./gradlew build --info
+        run: ./gradlew build --scan --info
 
       - name: Publish
         run: >
-          ./gradlew publish --info
+          ./gradlew publish --scan --info
