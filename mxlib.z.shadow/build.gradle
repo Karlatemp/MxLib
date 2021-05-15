@@ -9,8 +9,10 @@
  * https://github.com/Karlatemp/MxLib/blob/master/LICENSE
  */
 
-import java.nio.file.Files
+
 import io.github.karlatemp.publicationsign.impl.ArtifactSignTask
+
+import java.nio.file.Files
 
 plugins {
     id 'io.github.karlatemp.publication-sign' version '1.1.0'
@@ -84,8 +86,14 @@ publishing {
             setUrl("https://oss.sonatype.org/service/local/staging/deploy/maven2")
 
             credentials {
-                username = rootProject.property('sonatype.user')
-                password = rootProject.property('sonatype.key')
+                def prop = { name ->
+                    if (rootProject.hasProperty(name)) {
+                        return rootProject.property(name)
+                    }
+                    return ""
+                }
+                username = prop('sonatype.user')
+                password = prop('sonatype.key')
             }
 
             metadataSources.ignoreGradleMetadataRedirection()
