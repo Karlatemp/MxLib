@@ -14,10 +14,6 @@ plugins {
     id 'java-library'
 }
 
-repositories {
-    //noinspection GroovyAssignabilityCheck
-    maven { url = "https://libraries.minecraft.net" }
-}
 
 dependencies {
     api project(':mxlib-common')

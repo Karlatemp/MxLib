@@ -26,7 +26,8 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        jcenter()
+        //noinspection GroovyAssignabilityCheck
+        maven { url = "https://libraries.minecraft.net" }
         //noinspection GroovyAssignabilityCheck
         maven { url = 'https://hub.spigotmc.org/nexus/content/groups/public/' }
     }
