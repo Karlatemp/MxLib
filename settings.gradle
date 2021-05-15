@@ -50,7 +50,7 @@ include(':mxlib.z.shadowjar-kotlin')
 
 // include(':mirai.console.terminal')
 
-if (new File("mxlib.z.srx.debug").isDirectory()) {
+if (new File(rootProject.projectDir, "mxlib.z.srx.debug").isDirectory()) {
     include(':mxlib.z.srx.debug')
 }
 

@@ -4,3 +4,4 @@ build/
 /MxLibData
 /mxlib.z.srx.debug
 *.log
+/gradle.properties
