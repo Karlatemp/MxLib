@@ -47,8 +47,10 @@ class WindowsKit {
                     String next = scanner.nextLine();
                     if (next.isEmpty()) break;
                     List<String> list = splitter.splitToList(next);
-                    System.out.println("Line: " + next + ", b64:" + Base64.getEncoder().encodeToString(next.getBytes(StandardCharsets.UTF_8)));
-                    System.out.println("List: " + list);
+                    if (DEBUG) {
+                        System.out.println("Line: " + next + ", b64:" + Base64.getEncoder().encodeToString(next.getBytes(StandardCharsets.UTF_8)));
+                        System.out.println("List: " + list);
+                    }
                     rfx.put(list.get(1), list.get(3));
                 }
             }
