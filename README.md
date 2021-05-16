@@ -1,14 +1,12 @@
 # MxLib
 
-[ ![Download](https://api.bintray.com/packages/karlatemp/misc/MXLib/images/download.svg) ](https://bintray.com/karlatemp/misc/MXLib/_latestVersion)
-
-Package location: [bintray/Karlatemp/MXLib](https://bintray.com/karlatemp/misc/MXLib)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.karlatemp.mxlib/mxlib-api.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:io.github.karlatemp.mxlib)
 
 ## Use in gradle
 
 ```groovy
 repositories {
-    jcenter() // Add the jcenter repo
+    mavenCentral()
 }
 
 dependencies {
