@@ -129,6 +129,7 @@ public class MxSelenium {
 
     private static boolean initialized;
     private static BiFunction<String, Consumer<Capabilities>, RemoteWebDriver> driverSupplier;
+    private static Class<? extends RemoteWebDriver> driverClass;
 
     public static void initialize() throws Exception {
         if (initialized) return;
@@ -209,6 +210,7 @@ public class MxSelenium {
                             }
                     );
                     System.setProperty("webdriver.chrome.driver", chromedriverExecutable.getPath());
+                    driverClass = ChromeDriver.class;
                     driverSupplier = (agent, c) -> {
                         ChromeOptions options = new ChromeOptions();
                         if (agent != null) options.addArguments("user-agent=" + agent);
@@ -222,6 +224,7 @@ public class MxSelenium {
                     File provider = FirefoxKit.parse();
                     System.setProperty("webdriver.gecko.driver", provider.getPath());
                     driverSupplier = firefox();
+                    driverClass = FirefoxDriver.class;
                     IS_SUPPORT = true;
                 } else {
                     Map<String, String> applicationInfo = WindowsKit.queryApplicationInfo(browser);
@@ -255,6 +258,7 @@ public class MxSelenium {
                         File provider = FirefoxKit.parse();
                         System.setProperty("webdriver.gecko.driver", provider.getPath());
                         driverSupplier = firefox();
+                        driverClass = FirefoxDriver.class;
                         IS_SUPPORT = true;
                     } else {
                         driverSupplier = (agent, c) -> {
@@ -323,6 +327,7 @@ public class MxSelenium {
                                     if (c != null) c.accept(options);
                                     return new ChromeDriver(options);
                                 };
+                                driverClass = ChromeDriver.class;
                                 break top;
                             }
                         }
@@ -369,6 +374,15 @@ public class MxSelenium {
 
     public static RemoteWebDriver newDriver(String useragent) {
         return newDriver(useragent, null);
+    }
+
+    public static Class<? extends RemoteWebDriver> getDriverClass() {
+        try {
+            initialize();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return driverClass;
     }
 
     public static RemoteWebDriver newDriver(String useragent, Consumer<Capabilities> consumer) {
