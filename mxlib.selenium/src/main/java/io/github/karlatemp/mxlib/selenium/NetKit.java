@@ -11,6 +11,7 @@
 
 package io.github.karlatemp.mxlib.selenium;
 
+import io.github.karlatemp.mxlib.logger.MLogger;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.*;
@@ -41,25 +42,27 @@ class NetKit {
             Invoke unzipper,
             boolean override
     ) throws IOException {
+        MLogger logger = MxSelenium.getLogger();
         if (!file.isFile() || override) {
             File parent = file.getParentFile();
-            if (parent == null) parent = new File(".");
+            if (parent != null) parent = new File(".");
             parent.mkdirs();
             File zip;
             if (zipname == null) zip = file;
             else zip = new File(parent, zipname);
 
-            System.err.println("Downloading " + file.getName() + " from " + url);
+            if (logger.isInfoEnabled()) {
+                logger.info("Downloading " + file.getName() + " from " + url);
+            }
             ArrayList<Throwable> errors = new ArrayList<>(retryCounts);
             for (int i = 0; i < retryCounts; i++) {
-                if (i != 0) {
-                    System.err.println("Download fail. retrying....");
+                if (i != 0 && logger.isInfoEnabled()) {
+                    logger.info("Download fail. retrying....");
                 }
                 try (OutputStream out = new BufferedOutputStream(new FileOutputStream(zip))) {
                     client.execute(new HttpGet(url)).getEntity().writeTo(out);
                 } catch (Throwable throwable) {
-                    //noinspection ThrowablePrintedToSystemOut
-                    System.err.println(throwable);
+                    logger.error(throwable.toString());
                     errors.add(throwable);
                     continue;
                 }

@@ -14,6 +14,7 @@ package io.github.karlatemp.mxlib.selenium;
 import com.google.common.base.Splitter;
 import io.github.karlatemp.mxlib.MxLib;
 import io.github.karlatemp.mxlib.common.utils.IOUtils;
+import io.github.karlatemp.mxlib.logger.MLogger;
 import io.github.karlatemp.mxlib.utils.Toolkit;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -47,6 +48,10 @@ public class MxSelenium {
 
     public static boolean isSupported() {
         return IS_SUPPORT;
+    }
+
+    static MLogger getLogger() {
+        return MxLib.getLoggerOrStd("MxLib Selenium");
     }
 
     static {

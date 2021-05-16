@@ -11,7 +11,6 @@
 
 package io.github.karlatemp.mxlib.selenium;
 
-import io.github.karlatemp.mxlib.MxLib;
 import io.github.karlatemp.mxlib.logger.MLogger;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -28,12 +27,9 @@ class ChromeKit {
     static final String GOOGLE_API = "https://chromedriver.storage.googleapis.com/";
     static final String TAOBAO_MIRROR = "http://npm.taobao.org/mirrors/chromedriver/";
 
-    private static MLogger getLogger() {
-        return MxLib.getLoggerOrStd("MxLib Selenium - Chrome");
-    }
 
     static {
-        MLogger logger = getLogger();
+        MLogger logger = MxSelenium.getLogger();
         if (System.getProperty("mxlib.selenium.chrome.no-mirror") != null) {
             address = GOOGLE_API;
             logger.info("Google Chrome Driver download mirror was disabled by `mxlib.selenium.chrome.no-mirror`");
@@ -72,7 +68,7 @@ class ChromeKit {
                 return bis.readLine();
             }
         }
-        MLogger logger = getLogger();
+        MLogger logger = MxSelenium.getLogger();
         List<Throwable> throwables = new ArrayList<>(5);
         while (true) {
             try {
