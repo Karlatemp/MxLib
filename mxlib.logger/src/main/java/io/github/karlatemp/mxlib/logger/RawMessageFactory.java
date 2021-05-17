@@ -29,6 +29,7 @@ import java.lang.management.ThreadInfo;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
@@ -280,7 +281,7 @@ public class RawMessageFactory implements MessageFactory {
     }
 
     protected StringBuilderFormattable printStackTrace(Throwable s, boolean frames) {
-        StringBuilderFormattable link = new StringBuilderFormattable.Link();
+        StringBuilderFormattable.Link link = new StringBuilderFormattable.Link();
         // Guard against malicious overrides of Throwable.equals by
         // using a Set with identity equality semantics.
         Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -304,6 +305,14 @@ public class RawMessageFactory implements MessageFactory {
         Throwable ourCause = s.getCause();
         if (ourCause != null)
             printEnclosedStackTrace(ourCause, link, trace, CAUSE_CAPTION(), StringBuilderFormattable.EMPTY, dejaVu, frames);
+        removeLn:
+        {
+            List<Object> list = link.getList();
+            if (list.isEmpty()) break removeLn;
+            Object latest = list.get(list.size() - 1);
+            if (latest != StringBuilderFormattable.LN) break removeLn;
+            list.remove(list.size() - 1);
+        }
         return link;
     }
 
