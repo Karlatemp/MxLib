@@ -74,7 +74,17 @@ public class TestRawMessageFactory {
         new Lg("HX").info("WXC", new Exception("Hello!"));
         new Lg("OWXV").warn(new Exception("Hi!"));
         new Lg("HX").info(new Exception("HOW ARE YOU!", new Exception("sx", new Exception("RT"))));
+        class TestStringOverriden extends Throwable {
+            TestStringOverriden(String msg) {
+                super(msg);
+            }
 
+            @Override
+            public String toString() {
+                return "TSO: " + getLocalizedMessage();
+            }
+        }
+        new Lg("HX").info(new TestStringOverriden("Test"));
     }
 
 }

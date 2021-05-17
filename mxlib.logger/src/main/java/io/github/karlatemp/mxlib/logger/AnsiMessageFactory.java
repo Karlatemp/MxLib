@@ -14,9 +14,12 @@ package io.github.karlatemp.mxlib.logger;
 import io.github.karlatemp.mxlib.annotations.injector.Inject;
 import io.github.karlatemp.mxlib.logger.utils.StackTraceElementUtils;
 import io.github.karlatemp.mxlib.utils.ClassLocator;
+import io.github.karlatemp.mxlib.utils.MethodOverriddenDeterminer;
 import io.github.karlatemp.mxlib.utils.StringBuilderFormattable;
 import io.github.karlatemp.mxlib.utils.StringUtils;
+import io.github.karlatemp.unsafeaccessor.UnsafeAccess;
 
+import java.lang.invoke.MethodType;
 import java.lang.management.LockInfo;
 
 import static io.github.karlatemp.mxlib.utils.StringBuilderFormattable.by;
@@ -26,6 +29,7 @@ import static io.github.karlatemp.mxlib.utils.StringBuilderFormattable.by;
  */
 public class AnsiMessageFactory extends RawMessageFactory {
     public static final StringBuilderFormattable
+            //region
             _0 = by(StringUtils.BkColors._0),
             _1 = by(StringUtils.BkColors._1),
             _2 = by(StringUtils.BkColors._2),
@@ -43,6 +47,22 @@ public class AnsiMessageFactory extends RawMessageFactory {
             _E = by(StringUtils.BkColors._E),
             _F = by(StringUtils.BkColors._F),
             RESET = by(StringUtils.BkColors.RESET);
+    //endregion
+
+    private static final MethodOverriddenDeterminer isToStringOverride;
+
+    static {
+        try {
+            isToStringOverride = MethodOverriddenDeterminer.of(
+                    UnsafeAccess.getInstance()::getTrustedIn,
+                    Throwable.class,
+                    "toString",
+                    MethodType.methodType(String.class)
+            ).withCache();
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     @Inject
     public AnsiMessageFactory() {
@@ -54,6 +74,20 @@ public class AnsiMessageFactory extends RawMessageFactory {
 
     protected void plusStackTraceElement(StringBuilderFormattable link, StackTraceElement s) {
         link.plusMsg("\t").plusMsg(_6).plusMsg("at ").plusMsg(getStackTraceElementMessage(s));
+    }
+
+    @Override
+    protected void plusThrowable(StringBuilderFormattable link, Throwable s) {
+        if (s != null && !isToStringOverride.isOverridden(s.getClass())) {
+            String cname = s.getClass().getName();
+            String message = s.getLocalizedMessage();
+            link.plusMsg(_4).plusMsg(cname);
+            if (message != null) {
+                link.plusMsg(RESET).plusMsg(": ").plusMsg(message);
+            }
+            return;
+        }
+        super.plusThrowable(link, s);
     }
 
     @Override
