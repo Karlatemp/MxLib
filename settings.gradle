@@ -39,6 +39,7 @@ imports(
         'mxlib.spigot.kotlin',
         'mxlib.spigot.impl',
         'mxlib.selenium',
+        'mxlib.terminal',
         // 'mxlib.legacy',
 )
 
