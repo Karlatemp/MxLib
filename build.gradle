@@ -36,8 +36,8 @@ allprojects {
     afterEvaluate {
         if (project.name == 'mxlib.z.shadow') return
         dependencies {
-            testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
-            testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
+            testImplementation 'org.junit.jupiter:junit-jupiter-api'
+            testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
             if (project.name.endsWith("-kotlin")
                     || project.name == 'mxlib.z.srx.debug'
             ) {
@@ -116,5 +116,34 @@ allprojects {
     if (buildScan != null) {
         buildScan.termsOfServiceUrl = "https://gradle.com/terms-of-service"
         buildScan.termsOfServiceAgree = "yes"
+    }
+})();
+
+({
+
+    def versionOverrides = [
+            '=====================================': '',
+            'io.netty'                             : '4.1.59.Final',
+            'org.jetbrains.kotlin'                 : '1.4.30',
+            'org.jetbrains:annotations'            : '21.0.0',
+            'org.junit.jupiter'                    : '5.7.2',
+            'org.ow2.asm'                          : '9.1',
+    ]
+    allprojects {
+        configurations.all { Configuration configuration ->
+            configuration.resolutionStrategy.eachDependency { dependency ->
+                def result1 = versionOverrides[dependency.requested.module.toString()]
+                if (result1 != null) {
+                    dependency.useVersion(result1)
+                    dependency.because("Custom override rule")
+                } else {
+                    def result2 = versionOverrides[dependency.requested.group]
+                    if (result2 != null) {
+                        dependency.useVersion(result2)
+                        dependency.because("Custom override rule")
+                    }
+                }
+            }
+        }
     }
 })();
