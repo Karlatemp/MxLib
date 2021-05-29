@@ -11,6 +11,7 @@
 
 package io.github.karlatemp.mxlib.utils;
 
+import io.github.karlatemp.mxlib.internal.ClassLocatorWithCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,4 +26,13 @@ public interface ClassLocator {
     @Nullable Path findLocate(@NotNull String classname);
 
     @Nullable Path findLocate(@NotNull URL url);
+
+    /**
+     * Return the locator with caching
+     *
+     * @since 3.0-dev-18
+     */
+    static ClassLocator withCache(ClassLocator delegate) {
+        return ClassLocatorWithCache.c(delegate);
+    }
 }

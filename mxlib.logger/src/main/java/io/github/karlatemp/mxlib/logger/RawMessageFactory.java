@@ -11,6 +11,7 @@
 
 package io.github.karlatemp.mxlib.logger;
 
+import io.github.karlatemp.mxlib.annotations.injector.AfterInject;
 import io.github.karlatemp.mxlib.annotations.injector.Inject;
 import io.github.karlatemp.mxlib.common.utils.PathUtils;
 import io.github.karlatemp.mxlib.common.utils.SystemUtils;
@@ -79,7 +80,7 @@ public class RawMessageFactory implements MessageFactory {
     }
 
     public RawMessageFactory(ClassLocator locator) {
-        this.locator = locator;
+        this.locator = ClassLocator.withCache(locator);
     }
 
     @Override
@@ -373,4 +374,8 @@ public class RawMessageFactory implements MessageFactory {
         }
     }
 
+    @AfterInject
+    private void afterInject() {
+        locator = ClassLocator.withCache(locator);
+    }
 }
