@@ -1,0 +1,24 @@
+#enable bk-color
+#enable unicode
+
+§b
+#date yyyy-MM-dd
+ §5
+#date HH:mm:ss
+§r [§6
+
+#aligned LEFT
+
+## #logger-name
+#logger-and-record-name
+
+#end-aligned
+
+§r] [§b
+
+#aligned CENTER
+#logger-level
+#end
+
+§r]
+#space 1

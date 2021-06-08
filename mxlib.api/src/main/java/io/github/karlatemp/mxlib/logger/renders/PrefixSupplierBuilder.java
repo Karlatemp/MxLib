@@ -11,10 +11,12 @@
 
 package io.github.karlatemp.mxlib.logger.renders;
 
+import io.github.karlatemp.mxlib.internal.PrefixSupplierParser;
 import io.github.karlatemp.mxlib.logger.renders.PrefixedRender.PrefixSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Scanner;
 import java.util.function.Supplier;
 
 /**
@@ -35,6 +37,45 @@ import java.util.function.Supplier;
  * }</pre>
  */
 public class PrefixSupplierBuilder {
+    /**
+     * Parse from file,
+     * <p>
+     * Example:
+     * <pre>
+     * {@code
+     * #enable bk-color
+     * #enable unicode
+     *
+     * §b
+     * #date yyyy-MM-dd
+     *  §5
+     * #date HH:mm:ss
+     * §r [§6
+     *
+     * #aligned LEFT
+     *
+     * ## #logger-name
+     * #logger-and-record-name
+     *
+     * #end-aligned
+     *
+     * §r] [§b
+     *
+     * #aligned CENTER
+     * #logger-level
+     * #end
+     *
+     * §r]
+     * #space 1
+     * }
+     * </pre>
+     *
+     * @since 3.0-dev-18
+     */
+    public static PrefixSupplier parseFrom(Scanner scanner) {
+        return PrefixSupplierParser.parse(scanner);
+    }
+
     protected PrefixSupplier current;
     protected PrefixSupplier last;
 

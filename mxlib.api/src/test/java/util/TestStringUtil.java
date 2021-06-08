@@ -11,12 +11,24 @@
 
 package util;
 
+import io.github.karlatemp.mxlib.utils.StringUtils;
 import io.github.karlatemp.mxlib.utils.StringUtils.BkColors;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class TestStringUtil {
     @Test
     void testBkTrans() {
-        System.out.println(BkColors.replaceToBkMessage(BkColors._1 + "Hello " + BkColors._B + "World"));
+        var msg = BkColors._1 + "Hello " + BkColors._B + "World";
+        var bkmsg = "§1Hello §bWorld";
+        Assertions.assertEquals(bkmsg, BkColors.replaceToBkMessage(msg));
+        Assertions.assertEquals(msg, BkColors.replaceToAnsiMsg(bkmsg));
+        Assertions.assertEquals("§k123", BkColors.replaceToAnsiMsg("§k123"));
+    }
+
+    @Test
+    void testParseUnicode() {
+        var msg = "\\u00a7114514\\u00a7";
+        Assertions.assertEquals("\u00a7114514\u00a7", StringUtils.parseUnicode(msg));
     }
 }
