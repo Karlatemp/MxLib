@@ -21,6 +21,7 @@ import org.codehaus.plexus.logging.console.ConsoleLoggerManager;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipFile;
@@ -38,7 +39,7 @@ class FirefoxKit {
             }
         }
         try {
-            NetKit.download(firefox_cache, API, "firefox_driver.json.redownload", (to, from) -> {
+            NetKit.download(firefox_cache, Collections.singleton(API), "firefox_driver.json.redownload", (to, from) -> {
                 to.delete();
                 if (!from.renameTo(to)) {
                     try (FileInputStream fis = new FileInputStream(from);

@@ -136,6 +136,15 @@ public class MxSelenium {
     private static BiFunction<String, Consumer<Capabilities>, RemoteWebDriver> driverSupplier;
     private static Class<? extends RemoteWebDriver> driverClass;
 
+    static Collection<String> setOf(String... urls) {
+        ArrayList<String> result = new ArrayList<>(urls.length);
+        for (String u : urls) {
+            if (!result.contains(u))
+                result.add(u);
+        }
+        return result;
+    }
+
     public static void initialize() throws Exception {
         if (initialized) return;
         synchronized (MxSelenium.class) {
@@ -168,6 +177,7 @@ public class MxSelenium {
                         data.mkdirs();
                         try (OutputStream out = new BufferedOutputStream(new FileOutputStream(bat));
                              InputStream res = MxSelenium.class.getResourceAsStream("resources/chromever.bat")) {
+                            assert res != null;
                             Toolkit.IO.writeTo(res, out);
                         }
                     }
@@ -203,7 +213,7 @@ public class MxSelenium {
                     String driverVer = ChromeKit.getDriverVersion(chromeverx);
                     File chromedriverExecutable = NetKit.download(
                             new File(data, "chromedriver-" + driverVer + ".exe"),
-                            ChromeKit.address + driverVer + "/chromedriver_win32.zip",
+                            setOf(ChromeKit.address + driverVer + "/chromedriver_win32.zip", ChromeKit.GOOGLE_API + driverVer + "/chromedriver_win32.zip"),
                             "chromedriver-" + driverVer + ".zip",
                             (tar, zipFile) -> {
                                 try (ZipFile zip = new ZipFile(zipFile)) {
@@ -311,7 +321,7 @@ public class MxSelenium {
                                 String driverVer = ChromeKit.getDriverVersion(ver);
                                 File chromedriverExecutable = NetKit.download(
                                         new File(data, "chromedriver-" + driverVer + "-mac64"),
-                                        ChromeKit.address + driverVer + "/chromedriver_mac64.zip",
+                                        setOf(ChromeKit.address + driverVer + "/chromedriver_mac64.zip", ChromeKit.GOOGLE_API + driverVer + "/chromedriver_mac64.zip"),
                                         "chromedriver-" + driverVer + "-mac64.zip",
                                         (tar, zipFile) -> {
                                             try (ZipFile zip = new ZipFile(zipFile)) {

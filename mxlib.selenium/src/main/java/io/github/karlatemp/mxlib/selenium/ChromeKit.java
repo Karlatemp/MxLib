@@ -13,7 +13,6 @@ package io.github.karlatemp.mxlib.selenium;
 
 import io.github.karlatemp.mxlib.logger.MLogger;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -74,16 +73,12 @@ class ChromeKit {
             try {
                 String uri;
                 if (chromever.isEmpty()) {
-                    uri = address + "LATEST_RELEASE";
+                    uri = "LATEST_RELEASE";
                 } else {
-                    uri = address + "LATEST_RELEASE_" + chromever;
+                    uri = "LATEST_RELEASE_" + chromever;
                 }
-                logger.info("Fetching chrome driver version from " + uri);
-                HttpResponse response = MxSelenium.client.execute(new HttpGet(uri));
-                if (response.getStatusLine().getStatusCode() != 200) {
-                    response.getEntity().getContent().close();
-                    throw new IOException("Response code not 200, " + response.getStatusLine().getStatusCode());
-                }
+                logger.info("Fetching chrome driver version from " + address + uri);
+                HttpResponse response = NetKit.fetch(MxSelenium.setOf(address + uri, GOOGLE_API + uri));
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(response.getEntity().getContent()));
                      Writer writer = new FileWriter(verfile)
