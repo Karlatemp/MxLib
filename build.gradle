@@ -21,7 +21,7 @@ plugins {
 allprojects {
 
     group 'io.github.karlatemp.mxlib'
-    version '3.0-dev-17'
+    version '3.0-dev-18'
 
     repositories {
         mavenLocal()
@@ -71,8 +71,8 @@ allprojects {
             targetCompatibility = JavaVersion.VERSION_1_8
 
             if (project.name == 'mxlib.z.srx.debug') {
-                sourceCompatibility = JavaVersion.VERSION_13
-                targetCompatibility = JavaVersion.VERSION_13
+                sourceCompatibility = JavaVersion.VERSION_15
+                targetCompatibility = JavaVersion.VERSION_15
             }
         }
 
