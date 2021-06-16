@@ -21,7 +21,7 @@ plugins {
 allprojects {
 
     group 'io.github.karlatemp.mxlib'
-    version '3.0-dev-18'
+    version '3.0-dev-19'
 
     repositories {
         mavenLocal()
@@ -130,6 +130,30 @@ allprojects {
             'org.ow2.asm'                          : '9.1',
     ]
     allprojects {
+        afterEvaluate {
+            configurations.all { Configuration configuration ->
+                def lst = configuration.dependencies.matching { Dependency dependency ->
+                    if (dependency.version != null) return false
+                    return true
+                }.toList()
+                lst.forEach { dep ->
+                    def result1 = versionOverrides[dep.toString()]
+                    if (result1 == null) {
+                        result1 = versionOverrides[dep.group]
+                    }
+                    if (result1 != null) {
+                        configuration.dependencies.remove(dep)
+                        configuration.dependencies.add(
+                                project.dependencies.create(
+                                        group: dep.group,
+                                        name: dep.name,
+                                        version: result1,
+                                )
+                        )
+                    }
+                }
+            }
+        }
         configurations.all { Configuration configuration ->
             configuration.resolutionStrategy.eachDependency { dependency ->
                 def result1 = versionOverrides[dependency.requested.module.toString()]
