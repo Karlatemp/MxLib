@@ -21,3 +21,10 @@ dependencies {
 }
 
 ```
+
+## Spigot Plugin Download
+```shell script
+# Replace 3.0-dev-19 to latest version before download
+
+curl -v -L https://repo1.maven.org/maven2/io/github/karlatemp/mxlib/mxlib-spigot-kotlin/3.0-dev-19/mxlib-spigot-kotlin-3.0-dev-19-all.jar
+```
