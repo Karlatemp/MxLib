@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class Suppliers {
-    enum NULL implements Supplier {
+    enum NULL implements Supplier, Lazy {
         I;
 
         @Override

@@ -571,12 +571,13 @@ public class Toolkit {
             while (true) {
                 InputStream next = data.get();
                 if (next == null) break;
-                do {
-                    int length = next.read(buffer);
-                    if (length == -1) break;
-                    md.update(buffer, 0, length);
-                } while (true);
-                next.close();
+                try (InputStream is = next) {
+                    do {
+                        int length = is.read(buffer);
+                        if (length == -1) break;
+                        md.update(buffer, 0, length);
+                    } while (true);
+                }
             }
             return md.digest();
         }
