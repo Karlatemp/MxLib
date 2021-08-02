@@ -13,6 +13,7 @@ package io.github.karlatemp.mxlib.utils;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +68,7 @@ public interface StringBuilderFormattable {
         }
 
         @Override
-        public @NotNull StringBuilderFormattable plusMsg(@NotNull Object next) {
+        public @NotNull StringBuilderFormattable plusMsg(@Nullable Object next) {
             if (next instanceof StringBuilderFormattable) return (StringBuilderFormattable) next;
             return byLazyToString(next);
         }
@@ -127,6 +128,7 @@ public interface StringBuilderFormattable {
     static StringBuilderFormattable byLazyToString(Object any) {
         if (any == null) return NULL;
         if (any instanceof StringBuilderFormattable) return (StringBuilderFormattable) any;
+        if (any instanceof CharSequence) return by((CharSequence) any);
 
         return new StringBuilderFormattable() {
             @Override
@@ -137,6 +139,11 @@ public interface StringBuilderFormattable {
             @Override
             public String toString() {
                 return any.toString();
+            }
+
+            @Override
+            public String to_string() {
+                return toString();
             }
 
             @Override
@@ -250,10 +257,10 @@ public interface StringBuilderFormattable {
          */
         @Override
         public @NotNull StringBuilderFormattable plusMsg(
-                @NotNull Object next_
+                @Nullable Object next_
         ) {
             if (next_ == EMPTY) return this;
-            list.add(next_);
+            list.add(next_ == null ? NULL : next_);
             return this;
         }
 
@@ -332,12 +339,12 @@ public interface StringBuilderFormattable {
      * @see Link
      */
     default @NotNull StringBuilderFormattable plusMsg(
-            @NotNull Object next
+            @Nullable Object next
     ) {
         if (next == EMPTY) return this;
         Link link = new Link();
         link.list.add(this);
-        link.list.add(next);
+        link.list.add(next == null ? NULL : next);
         return link;
     }
 

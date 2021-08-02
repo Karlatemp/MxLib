@@ -51,6 +51,10 @@ public class BasicMessageFactory implements MessageFactory {
             PrintWriter pw;
             thr.printStackTrace(pw = new PrintWriter(writer));
             pw.flush();
+            StringBuffer buffer = writer.getBuffer();
+            while (buffer.length() > 0 && Character.isWhitespace(buffer.charAt(buffer.length() - 1))) {
+                buffer.setLength(buffer.length() - 1);
+            }
             return writer;
         }));
     }

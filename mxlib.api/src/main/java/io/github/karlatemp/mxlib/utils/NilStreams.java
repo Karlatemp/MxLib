@@ -509,7 +509,7 @@ public class NilStreams {
         public void write(int b) {
         }
 
-        @Override
+        // @Override
         public void write(@NotNull byte[] b) {
         }
 
