@@ -66,9 +66,7 @@ public class SimpleRender implements MessageRender {
         if (record != null) {
             if (message != null) builder.append('\n');
             Throwable thr = record.getThrown();
-            record.setThrown(null);
             builder.append(SIMPLE_FORMATTER.formatMessage(record));
-            record.setThrown(thr);
             if (thr != null) {
                 builder.append('\n');
                 factory.dump(thr, true).formatTo(builder);
