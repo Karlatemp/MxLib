@@ -159,6 +159,13 @@ public class PrefixedRender implements MessageRender {
         }
 
         /**
+         * A {@link PrefixSupplier} returns current thread name
+         *
+         * @since 3.0-dev-21
+         */
+        static @NotNull PrefixSupplier threadName() { return PrefixSupplierInternal.T_NAME.I; }
+
+        /**
          * Return a center aligned {@link PrefixSupplier}
          */
         default @NotNull PrefixSupplier aligned() {

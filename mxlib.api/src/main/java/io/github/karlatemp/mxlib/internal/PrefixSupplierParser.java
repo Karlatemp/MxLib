@@ -68,6 +68,7 @@ public class PrefixSupplierParser {
                         break;
                     }
                     case "#top":
+                    case "#end":
                         break top;
                     case "#logger-and-record-name":
                         builder.loggerAndRecordName();
@@ -86,6 +87,14 @@ public class PrefixSupplierParser {
                         PrefixedRender.PrefixSupplier parse = parse(scanner, options);
                         if (opt == null) builder.append(parse.aligned());
                         else builder.append(parse.aligned(PrefixedRender.AlignedSupplier.AlignType.valueOf(opt)));
+                        break;
+                    }
+                    case "#thread":
+                    case "#thread-name":
+                    case "#current-thread":
+                    case "#current-thread-name": {
+                        builder.threadName();
+                        break;
                     }
                 }
             } else {

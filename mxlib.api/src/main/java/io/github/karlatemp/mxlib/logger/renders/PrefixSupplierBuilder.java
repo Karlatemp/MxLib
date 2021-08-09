@@ -149,6 +149,13 @@ public class PrefixSupplierBuilder {
         return this;
     }
 
+    /**
+     * @since 3.0-dev-21
+     */
+    public PrefixSupplierBuilder threadName() {
+        return append(PrefixSupplier.threadName());
+    }
+
     public PrefixSupplier complete() {
         if (shouldPlusLast()) {
             current = current.plus(last);

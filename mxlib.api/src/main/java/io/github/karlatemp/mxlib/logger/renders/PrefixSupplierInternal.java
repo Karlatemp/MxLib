@@ -147,4 +147,13 @@ class PrefixSupplierInternal {
             return level.getName();
         }
     }
+
+    enum T_NAME implements PrefixedRender.PrefixSupplier {
+        I;
+
+        @Override
+        public @NotNull CharSequence rendPrefix(@Nullable String loggerName, @Nullable MMarket market, @NotNull StringBuilder content, boolean isError, @Nullable Level level, @Nullable LogRecord record) {
+            return Thread.currentThread().getName();
+        }
+    }
 }
