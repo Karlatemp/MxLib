@@ -13,6 +13,7 @@ package io.github.karlatemp.mxlib.logger;
 
 import org.jetbrains.annotations.NotNull;
 
+// Typo: Marker
 public interface MMarket {
     @NotNull String getName();
 }

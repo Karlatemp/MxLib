@@ -29,7 +29,7 @@ public class NopLogger implements MLogger {
     }
 
     @Override
-    public boolean isEnabled(MMarket market) {
+    public boolean isEnabled(MMarket marker) {
         return false;
     }
 
@@ -39,7 +39,7 @@ public class NopLogger implements MLogger {
     }
 
     @Override
-    public boolean isEnabled(MMarket market, Level level) {
+    public boolean isEnabled(MMarket marker, Level level) {
         return false;
     }
 
@@ -49,7 +49,7 @@ public class NopLogger implements MLogger {
     }
 
     @Override
-    public boolean isDebugEnabled(MMarket market) {
+    public boolean isDebugEnabled(MMarket marker) {
         return false;
     }
 
@@ -59,7 +59,7 @@ public class NopLogger implements MLogger {
     }
 
     @Override
-    public boolean isVerboseEnabled(MMarket market) {
+    public boolean isVerboseEnabled(MMarket marker) {
         return false;
     }
 
@@ -69,7 +69,7 @@ public class NopLogger implements MLogger {
     }
 
     @Override
-    public boolean isInfoEnabled(MMarket market) {
+    public boolean isInfoEnabled(MMarket marker) {
         return false;
     }
 
@@ -79,7 +79,7 @@ public class NopLogger implements MLogger {
     }
 
     @Override
-    public boolean isWarnEnabled(MMarket market) {
+    public boolean isWarnEnabled(MMarket marker) {
         return false;
     }
 
@@ -89,72 +89,72 @@ public class NopLogger implements MLogger {
     }
 
     @Override
-    public boolean isErrorEnabled(MMarket market) {
+    public boolean isErrorEnabled(MMarket marker) {
         return false;
     }
 
     @Override
-    public void log(MMarket market, LogRecord logRecord) {
+    public void log(MMarket marker, LogRecord logRecord) {
 
     }
 
     @Override
-    public void log(MMarket market, Level level, StringBuilderFormattable message) {
+    public void log(MMarket marker, Level level, StringBuilderFormattable message) {
 
     }
 
     @Override
-    public void info(MMarket market, StringBuilderFormattable msg) {
+    public void info(MMarket marker, StringBuilderFormattable msg) {
 
     }
 
     @Override
-    public void warn(MMarket market, StringBuilderFormattable msg) {
+    public void warn(MMarket marker, StringBuilderFormattable msg) {
 
     }
 
     @Override
-    public void error(MMarket market, StringBuilderFormattable msg) {
+    public void error(MMarket marker, StringBuilderFormattable msg) {
 
     }
 
     @Override
-    public void debug(MMarket market, StringBuilderFormattable msg) {
+    public void debug(MMarket marker, StringBuilderFormattable msg) {
 
     }
 
     @Override
-    public void verbose(MMarket market, StringBuilderFormattable msg) {
+    public void verbose(MMarket marker, StringBuilderFormattable msg) {
 
     }
 
     @Override
-    public void log(MMarket market, Level level, StringBuilderFormattable message, Throwable throwable) {
+    public void log(MMarket marker, Level level, StringBuilderFormattable message, Throwable throwable) {
 
     }
 
     @Override
-    public void info(MMarket market, StringBuilderFormattable msg, Throwable throwable) {
+    public void info(MMarket marker, StringBuilderFormattable msg, Throwable throwable) {
 
     }
 
     @Override
-    public void warn(MMarket market, StringBuilderFormattable msg, Throwable throwable) {
+    public void warn(MMarket marker, StringBuilderFormattable msg, Throwable throwable) {
 
     }
 
     @Override
-    public void error(MMarket market, StringBuilderFormattable msg, Throwable throwable) {
+    public void error(MMarket marker, StringBuilderFormattable msg, Throwable throwable) {
 
     }
 
     @Override
-    public void debug(MMarket market, StringBuilderFormattable msg, Throwable throwable) {
+    public void debug(MMarket marker, StringBuilderFormattable msg, Throwable throwable) {
 
     }
 
     @Override
-    public void verbose(MMarket market, StringBuilderFormattable msg, Throwable throwable) {
+    public void verbose(MMarket marker, StringBuilderFormattable msg, Throwable throwable) {
 
     }
 
@@ -249,57 +249,57 @@ public class NopLogger implements MLogger {
     }
 
     @Override
-    public void log(MMarket market, Level level, String message, Throwable throwable) {
+    public void log(MMarket marker, Level level, String message, Throwable throwable) {
 
     }
 
     @Override
-    public void info(MMarket market, String msg, Throwable throwable) {
+    public void info(MMarket marker, String msg, Throwable throwable) {
 
     }
 
     @Override
-    public void warn(MMarket market, String msg, Throwable throwable) {
+    public void warn(MMarket marker, String msg, Throwable throwable) {
 
     }
 
     @Override
-    public void error(MMarket market, String msg, Throwable throwable) {
+    public void error(MMarket marker, String msg, Throwable throwable) {
 
     }
 
     @Override
-    public void debug(MMarket market, String msg, Throwable throwable) {
+    public void debug(MMarket marker, String msg, Throwable throwable) {
 
     }
 
     @Override
-    public void verbose(MMarket market, String msg, Throwable throwable) {
+    public void verbose(MMarket marker, String msg, Throwable throwable) {
 
     }
 
     @Override
-    public void info(MMarket market, Throwable throwable) {
+    public void info(MMarket marker, Throwable throwable) {
 
     }
 
     @Override
-    public void warn(MMarket market, Throwable throwable) {
+    public void warn(MMarket marker, Throwable throwable) {
 
     }
 
     @Override
-    public void error(MMarket market, Throwable throwable) {
+    public void error(MMarket marker, Throwable throwable) {
 
     }
 
     @Override
-    public void debug(MMarket market, Throwable throwable) {
+    public void debug(MMarket marker, Throwable throwable) {
 
     }
 
     @Override
-    public void verbose(MMarket market, Throwable throwable) {
+    public void verbose(MMarket marker, Throwable throwable) {
 
     }
 
@@ -334,27 +334,27 @@ public class NopLogger implements MLogger {
     }
 
     @Override
-    public void info(MMarket market, String msg) {
+    public void info(MMarket marker, String msg) {
 
     }
 
     @Override
-    public void warn(MMarket market, String msg) {
+    public void warn(MMarket marker, String msg) {
 
     }
 
     @Override
-    public void error(MMarket market, String msg) {
+    public void error(MMarket marker, String msg) {
 
     }
 
     @Override
-    public void debug(MMarket market, String msg) {
+    public void debug(MMarket marker, String msg) {
 
     }
 
     @Override
-    public void verbose(MMarket market, String msg) {
+    public void verbose(MMarket marker, String msg) {
 
     }
 

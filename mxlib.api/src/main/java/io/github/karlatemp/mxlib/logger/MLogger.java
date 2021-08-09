@@ -19,61 +19,61 @@ import java.util.logging.LogRecord;
 public interface MLogger {
     String getName();
 
-    boolean isEnabled(MMarket market);
+    boolean isEnabled(MMarket marker);
 
     boolean isEnabled(Level level);
 
-    boolean isEnabled(MMarket market, Level level);
+    boolean isEnabled(MMarket marker, Level level);
 
     boolean isDebugEnabled();
 
-    boolean isDebugEnabled(MMarket market);
+    boolean isDebugEnabled(MMarket marker);
 
     boolean isVerboseEnabled();
 
-    boolean isVerboseEnabled(MMarket market);
+    boolean isVerboseEnabled(MMarket marker);
 
     boolean isInfoEnabled();
 
-    boolean isInfoEnabled(MMarket market);
+    boolean isInfoEnabled(MMarket marker);
 
     boolean isWarnEnabled();
 
-    boolean isWarnEnabled(MMarket market);
+    boolean isWarnEnabled(MMarket marker);
 
     boolean isErrorEnabled();
 
-    boolean isErrorEnabled(MMarket market);
+    boolean isErrorEnabled(MMarket marker);
 
     //////////////////////////////////////////////////////////////
 
-    void log(MMarket market, LogRecord logRecord);
+    void log(MMarket marker, LogRecord logRecord);
 
-    void log(MMarket market, Level level, StringBuilderFormattable message);
+    void log(MMarket marker, Level level, StringBuilderFormattable message);
 
-    void info(MMarket market, StringBuilderFormattable msg);
+    void info(MMarket marker, StringBuilderFormattable msg);
 
-    void warn(MMarket market, StringBuilderFormattable msg);
+    void warn(MMarket marker, StringBuilderFormattable msg);
 
-    void error(MMarket market, StringBuilderFormattable msg);
+    void error(MMarket marker, StringBuilderFormattable msg);
 
-    void debug(MMarket market, StringBuilderFormattable msg);
+    void debug(MMarket marker, StringBuilderFormattable msg);
 
-    void verbose(MMarket market, StringBuilderFormattable msg);
+    void verbose(MMarket marker, StringBuilderFormattable msg);
 
     //////////////////////////////////////////////////////////////
 
-    void log(MMarket market, Level level, StringBuilderFormattable message, Throwable throwable);
+    void log(MMarket marker, Level level, StringBuilderFormattable message, Throwable throwable);
 
-    void info(MMarket market, StringBuilderFormattable msg, Throwable throwable);
+    void info(MMarket marker, StringBuilderFormattable msg, Throwable throwable);
 
-    void warn(MMarket market, StringBuilderFormattable msg, Throwable throwable);
+    void warn(MMarket marker, StringBuilderFormattable msg, Throwable throwable);
 
-    void error(MMarket market, StringBuilderFormattable msg, Throwable throwable);
+    void error(MMarket marker, StringBuilderFormattable msg, Throwable throwable);
 
-    void debug(MMarket market, StringBuilderFormattable msg, Throwable throwable);
+    void debug(MMarket marker, StringBuilderFormattable msg, Throwable throwable);
 
-    void verbose(MMarket market, StringBuilderFormattable msg, Throwable throwable);
+    void verbose(MMarket marker, StringBuilderFormattable msg, Throwable throwable);
 
     //////////////////////////////////////////////////////////////
 
@@ -117,29 +117,29 @@ public interface MLogger {
 
     //////////////////////////////////////////////////////////////
 
-    void log(MMarket market, Level level, String message, Throwable throwable);
+    void log(MMarket marker, Level level, String message, Throwable throwable);
 
-    void info(MMarket market, String msg, Throwable throwable);
+    void info(MMarket marker, String msg, Throwable throwable);
 
-    void warn(MMarket market, String msg, Throwable throwable);
+    void warn(MMarket marker, String msg, Throwable throwable);
 
-    void error(MMarket market, String msg, Throwable throwable);
+    void error(MMarket marker, String msg, Throwable throwable);
 
-    void debug(MMarket market, String msg, Throwable throwable);
+    void debug(MMarket marker, String msg, Throwable throwable);
 
-    void verbose(MMarket market, String msg, Throwable throwable);
+    void verbose(MMarket marker, String msg, Throwable throwable);
 
     //////////////////////////////////////////////////////////////
 
-    void info(MMarket market, Throwable throwable);
+    void info(MMarket marker, Throwable throwable);
 
-    void warn(MMarket market, Throwable throwable);
+    void warn(MMarket marker, Throwable throwable);
 
-    void error(MMarket market, Throwable throwable);
+    void error(MMarket marker, Throwable throwable);
 
-    void debug(MMarket market, Throwable throwable);
+    void debug(MMarket marker, Throwable throwable);
 
-    void verbose(MMarket market, Throwable throwable);
+    void verbose(MMarket marker, Throwable throwable);
 
     //////////////////////////////////////////////////////////////
 
@@ -157,15 +157,15 @@ public interface MLogger {
 
     //////////////////////////////////////////////////////////////
 
-    void info(MMarket market, String msg);
+    void info(MMarket marker, String msg);
 
-    void warn(MMarket market, String msg);
+    void warn(MMarket marker, String msg);
 
-    void error(MMarket market, String msg);
+    void error(MMarket marker, String msg);
 
-    void debug(MMarket market, String msg);
+    void debug(MMarket marker, String msg);
 
-    void verbose(MMarket market, String msg);
+    void verbose(MMarket marker, String msg);
 
     //////////////////////////////////////////////////////////////
 

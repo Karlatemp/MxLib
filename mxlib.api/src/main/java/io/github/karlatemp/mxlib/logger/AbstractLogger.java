@@ -18,8 +18,8 @@ import java.util.logging.LogRecord;
 
 public abstract class AbstractLogger implements MLogger {
 
-    public boolean isEnabled(MMarket market, Level level) {
-        return isEnabled(market) && isEnabled(level);
+    public boolean isEnabled(MMarket marker, Level level) {
+        return isEnabled(marker) && isEnabled(level);
     }
 
     @Override
@@ -44,33 +44,33 @@ public abstract class AbstractLogger implements MLogger {
     }
 
     @Override
-    public void log(MMarket market, Level level, StringBuilderFormattable message, Throwable throwable) {
-        log(market, level, join(message, throwable));
+    public void log(MMarket marker, Level level, StringBuilderFormattable message, Throwable throwable) {
+        log(marker, level, join(message, throwable));
     }
 
     @Override
-    public void info(MMarket market, StringBuilderFormattable msg, Throwable throwable) {
-        info(market, join(msg, throwable));
+    public void info(MMarket marker, StringBuilderFormattable msg, Throwable throwable) {
+        info(marker, join(msg, throwable));
     }
 
     @Override
-    public void warn(MMarket market, StringBuilderFormattable msg, Throwable throwable) {
-        warn(market, join(msg, throwable));
+    public void warn(MMarket marker, StringBuilderFormattable msg, Throwable throwable) {
+        warn(marker, join(msg, throwable));
     }
 
     @Override
-    public void error(MMarket market, StringBuilderFormattable msg, Throwable throwable) {
-        error(market, join(msg, throwable));
+    public void error(MMarket marker, StringBuilderFormattable msg, Throwable throwable) {
+        error(marker, join(msg, throwable));
     }
 
     @Override
-    public void debug(MMarket market, StringBuilderFormattable msg, Throwable throwable) {
-        debug(market, join(msg, throwable));
+    public void debug(MMarket marker, StringBuilderFormattable msg, Throwable throwable) {
+        debug(marker, join(msg, throwable));
     }
 
     @Override
-    public void verbose(MMarket market, StringBuilderFormattable msg, Throwable throwable) {
-        verbose(market, join(msg, throwable));
+    public void verbose(MMarket marker, StringBuilderFormattable msg, Throwable throwable) {
+        verbose(marker, join(msg, throwable));
     }
 
     @Override
@@ -135,36 +135,36 @@ public abstract class AbstractLogger implements MLogger {
     }
 
     @Override
-    public void log(MMarket market, Level level, String message, Throwable throwable) {
-        log(market, level, join(message, throwable));
+    public void log(MMarket marker, Level level, String message, Throwable throwable) {
+        log(marker, level, join(message, throwable));
     }
 
     @Override
-    public void info(MMarket market, String msg, Throwable throwable) {
-        info(market, join(msg, throwable));
+    public void info(MMarket marker, String msg, Throwable throwable) {
+        info(marker, join(msg, throwable));
     }
 
     @Override
-    public void warn(MMarket market, String msg, Throwable throwable) {
-        warn(market, join(msg, throwable));
-
-    }
-
-    @Override
-    public void error(MMarket market, String msg, Throwable throwable) {
-        error(market, join(msg, throwable));
+    public void warn(MMarket marker, String msg, Throwable throwable) {
+        warn(marker, join(msg, throwable));
 
     }
 
     @Override
-    public void debug(MMarket market, String msg, Throwable throwable) {
-        debug(market, join(msg, throwable));
+    public void error(MMarket marker, String msg, Throwable throwable) {
+        error(marker, join(msg, throwable));
 
     }
 
     @Override
-    public void verbose(MMarket market, String msg, Throwable throwable) {
-        verbose(market, join(msg, throwable));
+    public void debug(MMarket marker, String msg, Throwable throwable) {
+        debug(marker, join(msg, throwable));
+
+    }
+
+    @Override
+    public void verbose(MMarket marker, String msg, Throwable throwable) {
+        verbose(marker, join(msg, throwable));
     }
 
     @Override
@@ -228,8 +228,8 @@ public abstract class AbstractLogger implements MLogger {
     }
 
     @Override
-    public void info(MMarket market, String msg) {
-        info(market, StringBuilderFormattable.by(msg));
+    public void info(MMarket marker, String msg) {
+        info(marker, StringBuilderFormattable.by(msg));
     }
 
     @Override
@@ -238,23 +238,23 @@ public abstract class AbstractLogger implements MLogger {
     }
 
     @Override
-    public void warn(MMarket market, String msg) {
-        warn(market, StringBuilderFormattable.by(msg));
+    public void warn(MMarket marker, String msg) {
+        warn(marker, StringBuilderFormattable.by(msg));
     }
 
     @Override
-    public void error(MMarket market, String msg) {
-        error(market, StringBuilderFormattable.by(msg));
+    public void error(MMarket marker, String msg) {
+        error(marker, StringBuilderFormattable.by(msg));
     }
 
     @Override
-    public void debug(MMarket market, String msg) {
-        debug(market, StringBuilderFormattable.by(msg));
+    public void debug(MMarket marker, String msg) {
+        debug(marker, StringBuilderFormattable.by(msg));
     }
 
     @Override
-    public void verbose(MMarket market, String msg) {
-        verbose(market, StringBuilderFormattable.by(msg));
+    public void verbose(MMarket marker, String msg) {
+        verbose(marker, StringBuilderFormattable.by(msg));
     }
 
     @Override
@@ -284,27 +284,27 @@ public abstract class AbstractLogger implements MLogger {
 
 
     @Override
-    public void info(MMarket market, Throwable throwable) {
-        info(market, (String) null, throwable);
+    public void info(MMarket marker, Throwable throwable) {
+        info(marker, (String) null, throwable);
     }
 
     @Override
-    public void error(MMarket market, Throwable throwable) {
-        error(market, (String) null, throwable);
+    public void error(MMarket marker, Throwable throwable) {
+        error(marker, (String) null, throwable);
     }
 
     @Override
-    public void warn(MMarket market, Throwable throwable) {
-        warn(market, (String) null, throwable);
+    public void warn(MMarket marker, Throwable throwable) {
+        warn(marker, (String) null, throwable);
     }
 
     @Override
-    public void debug(MMarket market, Throwable throwable) {
-        debug(market, (String) null, throwable);
+    public void debug(MMarket marker, Throwable throwable) {
+        debug(marker, (String) null, throwable);
     }
 
     @Override
-    public void verbose(MMarket market, Throwable throwable) {
-        verbose(market, (String) null, throwable);
+    public void verbose(MMarket marker, Throwable throwable) {
+        verbose(marker, (String) null, throwable);
     }
 }
