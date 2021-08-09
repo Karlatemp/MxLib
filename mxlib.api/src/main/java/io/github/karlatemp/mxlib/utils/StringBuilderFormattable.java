@@ -11,6 +11,7 @@
 
 package io.github.karlatemp.mxlib.utils;
 
+import io.github.karlatemp.mxlib.internal.StringBuilderFormattableInternal;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -99,25 +100,14 @@ public interface StringBuilderFormattable {
      * @see String#valueOf(Object)
      */
     static String toString(Object object) {
-        if (object instanceof StringBuilderFormattable) {
-            StringBuilder builder = new StringBuilder();
-            ((StringBuilderFormattable) object).formatTo(builder);
-            return builder.toString();
-        }
-        return String.valueOf(object);
+        return StringBuilderFormattableInternal.toString(object);
     }
 
     /**
      * Append a value into StringBuilder
      */
     static void append(@NotNull StringBuilder builder, Object value) {
-        if (value instanceof StringBuilderFormattable) {
-            ((StringBuilderFormattable) value).formatTo(builder);
-        } else if (value instanceof CharSequence) {
-            builder.append((CharSequence) value);
-        } else {
-            builder.append(value);
-        }
+        StringBuilderFormattableInternal.append(builder, value);
     }
 
     /**
@@ -129,6 +119,8 @@ public interface StringBuilderFormattable {
         if (any == null) return NULL;
         if (any instanceof StringBuilderFormattable) return (StringBuilderFormattable) any;
         if (any instanceof CharSequence) return by((CharSequence) any);
+        StringBuilderFormattable tryConv = StringBuilderFormattableInternal.tryConv(any);
+        if (tryConv != null) return tryConv;
 
         return new StringBuilderFormattable() {
             @Override
