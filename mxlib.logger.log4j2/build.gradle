@@ -1,0 +1,24 @@
+/*
+ * Copyright (c) 2018-2021 Karlatemp. All rights reserved.
+ * @author Karlatemp <karlatemp@vip.qq.com> <https://github.com/Karlatemp>
+ *
+ * MXLib/MXLib/build.gradle
+ *
+ * Use of this source code is governed by the MIT license that can be found via the following link.
+ *
+ * https://github.com/Karlatemp/MxLib/blob/master/LICENSE
+ */
+
+plugins {
+    id 'java'
+    id 'java-library'
+}
+
+dependencies {
+    api project(':mxlib-logger')
+
+    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.1'
+    compileOnly group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.1'
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.14.1'
+    testImplementation project(':mxlib-logger').sourceSets.test.output
+}

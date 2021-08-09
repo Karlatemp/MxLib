@@ -32,6 +32,7 @@ imports(
         'mxlib.nbt',
         'mxlib.logger',
         'mxlib.logger.slf4j',
+        'mxlib.logger.log4j2',
         'mxlib.network',
         'mxlib.network.mc',
         'mxlib.network.cs',
