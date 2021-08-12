@@ -12,6 +12,7 @@
 package util;
 
 import io.github.karlatemp.mxlib.reflect.Reflections;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.invoke.MethodType;
@@ -21,6 +22,12 @@ import java.util.function.Consumer;
 public class TestReflection {
     public static void invoke(String name) {
         System.out.println("Ho!!!! " + name);
+    }
+
+    @Test
+    void testGetClassLoader() {
+        Reflections.getClassLoader((Class<?>) null);
+        Assertions.assertSame(TestReflection.class.getClassLoader(), Reflections.getClassLoader(TestReflection.class));
     }
 
     @Test

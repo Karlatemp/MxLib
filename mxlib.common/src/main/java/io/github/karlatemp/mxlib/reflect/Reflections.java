@@ -14,6 +14,7 @@ package io.github.karlatemp.mxlib.reflect;
 import io.github.karlatemp.caller.CallerFinder;
 import io.github.karlatemp.caller.StackFrame;
 import io.github.karlatemp.mxlib.utils.Predicates;
+import io.github.karlatemp.mxlib.utils.Toolkit;
 import io.github.karlatemp.unsafeaccessor.Root;
 import io.github.karlatemp.unsafeaccessor.UnsafeAccess;
 import org.jetbrains.annotations.Contract;
@@ -149,6 +150,37 @@ public class Reflections {
         return it -> it.getName().equals(name);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    static class ClassLoaderLookup {
+        static final Function<Class<?>, ClassLoader> FUNC = init();
+
+        private static Function init() {
+            try {
+                return init0();
+            } catch (Throwable throwable) {
+                throw new ExceptionInInitializerError(throwable);
+            }
+        }
+
+        private static Function init0() throws Throwable {
+            MethodHandles.Lookup lk = UA.getTrustedIn(Class.class);
+
+            MethodType typeCl = MethodType.methodType(ClassLoader.class);
+            MethodHandle mh = Toolkit.exec(null,
+                    () -> lk.findVirtual(Class.class, "getClassLoader0", typeCl),
+                    () -> lk.findGetter(Class.class, "classLoader", ClassLoader.class),
+                    () -> lk.findVirtual(Class.class, "getClassLoader", typeCl)
+            );
+            return bindTo(
+                    lk.in(Class.class),
+                    mh,
+                    Function.class,
+                    MethodType.methodType(Object.class, Object.class),
+                    "apply"
+            );
+        }
+    }
+
     public static ClassLoader getClassLoader(StackFrame caller) {
         if (caller == null) return null;
         Class<?> instance = caller.getClassInstance();
@@ -157,7 +189,7 @@ public class Reflections {
     }
 
     public static ClassLoader getClassLoader(Class<?> klass) {
-        if (klass != null) return klass.getClassLoader();
+        if (klass != null) return ClassLoaderLookup.FUNC.apply(klass);
         return null;
     }
 
