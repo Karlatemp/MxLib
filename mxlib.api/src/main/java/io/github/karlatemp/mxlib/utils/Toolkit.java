@@ -334,6 +334,19 @@ public class Toolkit {
         return false;
     }
 
+
+    /**
+     * @since 3.0-dev-21
+     */
+    public static boolean isClassAvailable(String name, ClassLoader classLoader) {
+        try {
+            Class.forName(name, false, classLoader);
+            return true;
+        } catch (ClassNotFoundException ignore) {
+            return false;
+        }
+    }
+
     /**
      * IO 数据操作
      *
