@@ -110,6 +110,30 @@ public class Toolkit {
     }
 
     /**
+     * Execute actions and return first successful result
+     *
+     * @since 3.0-dev-21
+     */
+    @SafeVarargs
+    public static <V> V exec(Callable<V>... actions) throws Throwable {
+        if (actions == null || actions.length == 0)
+            throw new IllegalArgumentException("No action");
+        Throwable throwable = null;
+        for (Callable<V> action : actions) {
+            if (action == null) continue;
+            try {
+                return action.call();
+            } catch (Throwable throwable1) {
+                if (throwable == null) throwable = throwable1;
+                else throwable.addSuppressed(throwable1);
+            }
+        }
+        if (throwable == null)
+            throw new NoSuchElementException("No response and exceptions");
+        throw throwable;
+    }
+
+    /**
      * Get class's package name.<br>
      * 截取类名的包名字
      *
