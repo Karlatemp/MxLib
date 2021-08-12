@@ -14,11 +14,45 @@ plugins {
     id 'java-library'
 }
 
+
 dependencies {
     testImplementation project(':mxlib-common')
     testImplementation project(':mxlib-logger')
 
-    implementation 'org.fusesource.jansi:jansi:2.3.2'
-    implementation 'org.jline:jline:3.19.0'
+    compileOnly 'net.java.dev.jna:jna'
+    compileOnly 'net.java.dev.jna:jna-platform'
+
+    api 'org.fusesource.jansi:jansi'
+    api 'org.jline:jline'
+    api 'io.github.karlatemp:unsafe-accessor'
+}
+
+sourceSets {
+    register('j8') {
+        it.compileClasspath += project.configurations.compileClasspath
+        it.runtimeClasspath += project.configurations.runtimeClasspath
+    }
+
+    register('j9') {
+        it.compileClasspath += project.configurations.compileClasspath
+        it.runtimeClasspath += project.configurations.runtimeClasspath
+
+        it.compileClasspath += getByName('j8').output
+        it.runtimeClasspath += getByName('j8').output
+    }
+}
+
+compileJ9Java {
+    sourceCompatibility = JavaVersion.VERSION_1_9
+    targetCompatibility = JavaVersion.VERSION_1_9
+}
+
+compileJ8Java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+jar {
+    from(compileJ8Java, compileJ9Java)
 }
 
