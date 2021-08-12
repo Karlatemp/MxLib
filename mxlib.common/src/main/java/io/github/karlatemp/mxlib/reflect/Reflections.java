@@ -15,6 +15,7 @@ import io.github.karlatemp.caller.CallerFinder;
 import io.github.karlatemp.caller.StackFrame;
 import io.github.karlatemp.mxlib.utils.Predicates;
 import io.github.karlatemp.unsafeaccessor.Root;
+import io.github.karlatemp.unsafeaccessor.UnsafeAccess;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +35,7 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"unchecked", "OptionalGetWithoutIsPresent"})
 public class Reflections {
-    private static final MethodHandles.Lookup TRUSTED = Root.getTrusted();
+    private static final UnsafeAccess UA = UnsafeAccess.getInstance();
 
     public static <T> T allocObject(Class<T> aClass) {
         try {
@@ -206,7 +207,7 @@ public class Reflections {
 
     public static MethodHandle mapToHandle(Method method) {
         try {
-            return TRUSTED.unreflect(method);
+            return UA.getTrustedIn(method.getDeclaringClass()).unreflect(method);
         } catch (IllegalAccessException exception) {
             throw new RuntimeException(exception);
         }
@@ -239,8 +240,9 @@ public class Reflections {
             MethodType samMethodType,
             String funcName
     ) throws Throwable {
+        Class<?> caller = CallerFinder.getCaller().getClassInstance();
         return bindTo(
-                TRUSTED.in(CallerFinder.getCaller().getClassInstance()),
+                UA.getTrustedIn(caller).in(caller),
                 handle, interfaceClass, samMethodType, funcName
         );
     }
@@ -251,8 +253,9 @@ public class Reflections {
             MethodType samMethodType,
             String funcName
     ) {
+        Class<?> caller = CallerFinder.getCaller().getClassInstance();
         return bindToNoErr(
-                TRUSTED.in(CallerFinder.getCaller().getClassInstance()),
+                UA.getTrustedIn(caller).in(caller),
                 handle, interfaceClass, samMethodType, funcName
         );
     }
@@ -282,7 +285,7 @@ public class Reflections {
                     "addURL", false,
                     void.class, URL.class
             ).map(method -> bindToNoErr(
-                    TRUSTED,
+                    UA.getTrustedIn(URLClassLoader.class).in(URLClassLoader.class),
                     mapToHandle(method),
                     BiConsumer.class,
                     MethodType.methodType(void.class, Object.class, Object.class),
