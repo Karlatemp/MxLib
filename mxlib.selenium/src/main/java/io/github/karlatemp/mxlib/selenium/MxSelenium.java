@@ -19,26 +19,23 @@ import io.github.karlatemp.mxlib.utils.Toolkit;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.time.Duration;
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.zip.ZipFile;
 
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
 
-@SuppressWarnings("ResultOfMethodCallIgnored")
+@SuppressWarnings({"ResultOfMethodCallIgnored", "unchecked", "rawtypes"})
 public class MxSelenium {
     static final Charset STD_CHARSET;
     static final File JAVA_EXECUTABLE;
@@ -132,9 +129,9 @@ public class MxSelenium {
         ), STD_CHARSET == null ? Charset.defaultCharset() : STD_CHARSET);
     }
 
-    private static boolean initialized;
-    private static BiFunction<String, Consumer<Capabilities>, RemoteWebDriver> driverSupplier;
-    private static Class<? extends RemoteWebDriver> driverClass;
+    private static volatile boolean initialized;
+    private static Collection<SeleniumProvider<?, ?>> providers;
+    private static SeleniumProvider<?, ?> defaultProvider;
 
     static Collection<String> setOf(String... urls) {
         ArrayList<String> result = new ArrayList<>(urls.length);
@@ -145,268 +142,112 @@ public class MxSelenium {
         return result;
     }
 
-    public static void initialize() throws Exception {
+    public static void initialize() {
         if (initialized) return;
         synchronized (MxSelenium.class) {
             if (initialized) return;
-            try {
-                initialize0();
-            } catch (Throwable throwable) {
-                driverSupplier = (a, b) -> {
-                    throw new RuntimeException(throwable);
-                };
-                IS_SUPPORT = false;
-                throw throwable;
-            }
+            initialize0();
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    private static void initialize0() throws Exception {
-        if (initialized) return;
-        synchronized (MxSelenium.class) {
-            if (initialized) return;
-            initialized = true;
-            String os = System.getProperty("os.name");
-            if (os.toLowerCase().startsWith("windows ")) {
-                String browser = WindowsKit.queryBrowserUsing();
-                if (browser.startsWith("Chrome")) {
-                    // region chrome
-                    File bat = new File(data, "chromever.bat");
-                    if (!bat.isFile()) {
-                        data.mkdirs();
-                        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(bat));
-                             InputStream res = MxSelenium.class.getResourceAsStream("resources/chromever.bat")) {
-                            assert res != null;
-                            Toolkit.IO.writeTo(res, out);
-                        }
-                    }
-                    String result = commandProcessResult("cmd", "/c", bat.getPath());
-                    if (result.trim().isEmpty()) {
-                        StringBuilder builder = new StringBuilder();
-                        for (String[] cmd : ChromeKit.windowsVerCommands) {
-                            builder.append(commandProcessResult(cmd));
-                            builder.append('\n').append('\n').append('\n');
-                        }
-                        result = builder.toString();
-                    }
-                    String chromeverx = System.getProperty("mxlib.selenium.chrome.version");
-                    if (chromeverx == null) {
-                        Map<String, Map<String, String>> chromever = WindowsKit.parseRegResult(result);
-                        Iterator<Map<String, String>> iterator = chromever.values().iterator();
-                        if (!iterator.hasNext()) {
-                            throw new UnsupportedOperationException("Unable to confirm the version of Chrome. " +
-                                    "Please set chrome version with `-Dmxlib.selenium.chrome.version=VERSION`. " +
-                                    "And report to https://github.com/Karlatemp/MxLib");
-                        }
-                        Map<String, String> next = iterator.next();
-                        String ver = next.getOrDefault("opv", next.get("pv"));
-                        if (ver == null) {
-                            throw new UnsupportedOperationException("Unable to confirm the version of Chrome. " +
-                                    "Please set chrome version with `-Dmxlib.selenium.chrome.version=VERSION`. " +
-                                    "And report to https://github.com/Karlatemp/MxLib\n" +
-                                    result);
-                        }
-                        chromeverx = ver;
-                    }
-
-                    String driverVer = ChromeKit.getDriverVersion(chromeverx);
-                    File chromedriverExecutable = NetKit.download(
-                            new File(data, "chromedriver-" + driverVer + ".exe"),
-                            setOf(ChromeKit.address + driverVer + "/chromedriver_win32.zip", ChromeKit.GOOGLE_API + driverVer + "/chromedriver_win32.zip"),
-                            "chromedriver-" + driverVer + ".zip",
-                            (tar, zipFile) -> {
-                                try (ZipFile zip = new ZipFile(zipFile)) {
-                                    try (InputStream inp = zip.getInputStream(zip.getEntry("chromedriver.exe"));
-                                         OutputStream out = new BufferedOutputStream(new FileOutputStream(tar))) {
-                                        Toolkit.IO.writeTo(inp, out);
-                                    }
-                                }
-                            }
-                    );
-                    System.setProperty("webdriver.chrome.driver", chromedriverExecutable.getPath());
-                    driverClass = ChromeDriver.class;
-                    driverSupplier = (agent, c) -> {
-                        ChromeOptions options = new ChromeOptions();
-                        if (agent != null) options.addArguments("user-agent=" + agent);
-                        if (c != null) c.accept(options);
-                        return new ChromeDriver(options);
-                    };
-                    IS_SUPPORT = true;
-                    // endregion
-                } else if (browser.toLowerCase().startsWith("firefox")) {
-                    FirefoxKit.fetch();
-                    File provider = FirefoxKit.parse();
-                    System.setProperty("webdriver.gecko.driver", provider.getPath());
-                    driverSupplier = firefox();
-                    driverClass = FirefoxDriver.class;
-                    IS_SUPPORT = true;
-                } else {
-                    Map<String, String> applicationInfo = WindowsKit.queryApplicationInfo(browser);
-                    String appUserModelID = applicationInfo.get("AppUserModelID");
-                    if (appUserModelID != null) {
-                        if (appUserModelID.startsWith("Microsoft.MicrosoftEdge")) {
-                            /*
-                            // EdgeHTML cannot set UserAgent. not in support
-                            driverSupplier = (agent, c) -> {
-                                EdgeHtmlOptions options = new EdgeHtmlOptions();
-                                if (c != null) c.accept(options);
-                                return new EdgeHtmlDriver(options);
-                            };
-                            IS_SUPPORT = true;
-                            */
-                        }
-                    }
-
-                    if (!IS_SUPPORT) {
-                        driverSupplier = (agent, c) -> {
-                            throw new UnsupportedOperationException("Unsupported browser: " + browser + ", Only chrome/firefox supported");
-                        };
-                        IS_SUPPORT = false;
-                    }
-                }
-            } else if (os.equals("Linux")) {
-                try {
-                    String type = commandProcessResult("xdg-settings", "get", "default-web-browser");
-                    if (type.toLowerCase().startsWith("firefox")) {
-                        FirefoxKit.fetch();
-                        File provider = FirefoxKit.parse();
-                        System.setProperty("webdriver.gecko.driver", provider.getPath());
-                        driverSupplier = firefox();
-                        driverClass = FirefoxDriver.class;
-                        IS_SUPPORT = true;
-                    } else {
-                        driverSupplier = (agent, c) -> {
-                            throw new UnsupportedOperationException("Unsupported Platform: " + os + ", " + type + ", Only FireFox browser supported now.");
-                        };
-                        IS_SUPPORT = false;
-                    }
-                } catch (Throwable error) {
-                    throw new UnsupportedOperationException("Unsupported Platform: " + os, error);
-                }
-            } else if (os.startsWith("Mac OS")) {
-                try {
-                    //noinspection ArraysAsListWithZeroOrOneArgument
-                    Collection<String> supportedBrowsers = new HashSet<>(Arrays.asList(
-                            "Google Chrome"
-                    ));
-                    //noinspection ArraysAsListWithZeroOrOneArgument
-                    Collection<String> browsers = new HashSet<>(Arrays.asList(
-                            "Safari" // Safari not for support. Safari cannot set UserAgent
-                    ));
-                    browsers.addAll(supportedBrowsers);
-                    List<String> browsersInstalled = Stream.of(
-                            Objects.requireNonNull(
-                                    new File("/Applications").listFiles(),
-                                    "`new File(\"/Applications\").listFiles()` is `null`"
-                            )
-                    )
-                            .filter(it -> it.getName().endsWith(".app"))
-                            .map(file -> {
-                                String name = file.getName();
-                                return name.substring(0, name.length() - 4);
-                            })
-                            .filter(browsers::contains)
-                            .collect(Collectors.toList());
-                    top:
-                    for (String browser : browsersInstalled) {
-                        switch (browser) {
-                            // TODO: Firefox
-                            case "Google Chrome": {
-                                String ver = commandProcessResult(
-                                        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-                                        "--version"
-                                ).replace("Google Chrome", "").trim();
-                                // chromedriver_mac64.zip
-                                String driverVer = ChromeKit.getDriverVersion(ver);
-                                File chromedriverExecutable = NetKit.download(
-                                        new File(data, "chromedriver-" + driverVer + "-mac64"),
-                                        setOf(ChromeKit.address + driverVer + "/chromedriver_mac64.zip", ChromeKit.GOOGLE_API + driverVer + "/chromedriver_mac64.zip"),
-                                        "chromedriver-" + driverVer + "-mac64.zip",
-                                        (tar, zipFile) -> {
-                                            try (ZipFile zip = new ZipFile(zipFile)) {
-                                                try (InputStream inp = zip.getInputStream(zip.getEntry("chromedriver"));
-                                                     OutputStream out = new BufferedOutputStream(new FileOutputStream(tar))) {
-                                                    Toolkit.IO.writeTo(inp, out);
-                                                }
-                                            }
-                                            tar.setExecutable(true);
-                                        }
-                                );
-                                System.setProperty("webdriver.chrome.driver", chromedriverExecutable.getPath());
-
-                                IS_SUPPORT = true;
-                                driverSupplier = (agent, c) -> {
-                                    ChromeOptions options = new ChromeOptions();
-                                    if (agent != null) options.addArguments("user-agent=" + agent);
-                                    if (c != null) c.accept(options);
-                                    return new ChromeDriver(options);
-                                };
-                                driverClass = ChromeDriver.class;
-                                break top;
-                            }
-                        }
-                    }
-                    if (!IS_SUPPORT) {
-                        if (browsersInstalled.isEmpty()) {
-                            driverSupplier = (agent, c) -> {
-                                throw new UnsupportedOperationException("Unsupported Platform: " + os + ", No browser found. Please install one of the following browsers: " + supportedBrowsers);
-                            };
-                        } else {
-                            driverSupplier = (agent, c) -> {
-                                throw new UnsupportedOperationException("Unsupported Platform: " + os + ", No supported browser found. installed " + browsersInstalled + ". Please install one of the following browsers: " + supportedBrowsers);
-                            };
-                        }
-                    }
-                } catch (Throwable error) {
-                    throw new UnsupportedOperationException("Unsupported Platform: " + os, error);
-                }
-            }
-            if (driverSupplier == null) {
-                driverSupplier = (agent, c) -> {
-                    throw new UnsupportedOperationException("Unsupported Platform: " + os);
-                };
-                IS_SUPPORT = false;
-            }
-            if (!IS_SUPPORT) {
-                driverSupplier.apply(null, null); // Throw error
-            }
-        }
+    /**
+     * @since 3.0-dev-21
+     */
+    @Deprecated
+    public static void reinitialize() {
+        initialized = false;
+        initialize();
     }
 
-    private static BiFunction<String, Consumer<Capabilities>, RemoteWebDriver> firefox() {
-        return (agent, c) -> {
-            FirefoxOptions options = new FirefoxOptions();
-            if (agent != null) options.addPreference("general.useragent.override", agent);
-            if (c != null) c.accept(options);
-            return new FirefoxDriver(options);
-        };
+    private static void initialize0() {
+        providers = MSProviderCollect.collectAll();
+        for (SeleniumProvider<?, ?> provider : providers) {
+            if (provider.isSysDefault()) {
+                defaultProvider = provider;
+                return;
+            }
+        }
+        for (SeleniumProvider<?, ?> provider : providers) {
+            if (!(provider instanceof ExceptionProvider)) {
+                defaultProvider = provider;
+                return;
+            }
+        }
+        String errMsg = null;
+        for (SeleniumProvider<?, ?> provider : providers) {
+            if ((errMsg = ((ExceptionProvider) provider).msg) != null) {
+                break;
+            }
+        }
+        String errMsgFinal = errMsg;
+        defaultProvider = new SimpleSeleniumProvider<>(
+                "ERROR",
+                RemoteWebDriver.class,
+                Capabilities.class,
+                false, false,
+                (a, b) -> {
+                    UnsupportedOperationException err0 = new UnsupportedOperationException(errMsgFinal);
+                    for (ExceptionProvider provider : (Collection<ExceptionProvider>) (Collection) providers) {
+                        Throwable exception = provider.exception;
+                        if (exception != null) err0.addSuppressed(exception);
+                    }
+                    throw err0;
+                }
+        );
     }
 
     public static RemoteWebDriver newDriver() {
-        return newDriver(null);
+        initialize();
+        return defaultProvider.newDriver();
     }
 
     public static RemoteWebDriver newDriver(String useragent) {
-        return newDriver(useragent, null);
+        initialize();
+        return defaultProvider.newDriver(useragent);
     }
 
     public static Class<? extends RemoteWebDriver> getDriverClass() {
-        try {
-            initialize();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return driverClass;
+        initialize();
+        return defaultProvider.getDriverClass();
     }
 
     public static RemoteWebDriver newDriver(String useragent, Consumer<Capabilities> consumer) {
-        try {
-            initialize();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return driverSupplier.apply(useragent, consumer);
+        initialize();
+        return defaultProvider.newDriver(useragent, (Consumer) consumer);
+    }
+
+    /**
+     * @since 3.0-dev-21
+     */
+    public static SeleniumProvider<?, ?> getDefaultProvider() {
+        initialize();
+        return defaultProvider;
+    }
+
+    /**
+     * @since 3.0-dev-21
+     */
+    public static Collection<SeleniumProvider<?, ?>> getProviders() {
+        initialize();
+        return providers.stream()
+                .filter(it -> !(it instanceof ExceptionProvider))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * @since 3.0-dev-21
+     */
+    public static Collection<Throwable> getInitExceptions() {
+        initialize();
+        return providers.stream()
+                .map(it -> {
+                    if (it instanceof ExceptionProvider) {
+                        return ((ExceptionProvider) it).exception;
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public static void main(String[] args) throws Throwable {

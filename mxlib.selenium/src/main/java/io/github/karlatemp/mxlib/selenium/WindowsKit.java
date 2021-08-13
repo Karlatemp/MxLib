@@ -33,8 +33,25 @@ class WindowsKit {
         try (Scanner scanner = new Scanner(result)) {
             Map<String, Map<String, String>> res = new HashMap<>();
 
-            while (scanner.hasNextLine()) {
-                String nextLine = scanner.nextLine();
+            class NextLineX {
+                String prev;
+
+                String nextLine() {
+                    String prev = this.prev;
+                    if (prev == null) return scanner.nextLine();
+                    this.prev = null;
+                    return prev;
+                }
+
+                boolean hasNextLine() {
+                    if (prev != null) return true;
+                    return scanner.hasNextLine();
+                }
+            }
+            NextLineX nextLineX = new NextLineX();
+
+            while (nextLineX.hasNextLine()) {
+                String nextLine = nextLineX.nextLine();
                 if (nextLine.isEmpty()) {
                     continue;
                 }
@@ -43,9 +60,13 @@ class WindowsKit {
                     System.out.println("===== Next Chunk: " + nextLine);
                 }
                 Map<String, String> rfx = res.computeIfAbsent(nextLine, $ -> new HashMap<>());
-                while (scanner.hasNextLine()) {
-                    String next = scanner.nextLine();
+                while (nextLineX.hasNextLine()) {
+                    String next = nextLineX.nextLine();
                     if (next.isEmpty()) break;
+                    if (!Character.isWhitespace(next.charAt(0))) {
+                        nextLineX.prev = next;
+                        break;
+                    }
                     List<String> list = splitter.splitToList(next);
                     if (DEBUG) {
                         System.out.println("Line: " + next + ", b64:" + Base64.getEncoder().encodeToString(next.getBytes(StandardCharsets.UTF_8)));
@@ -91,5 +112,11 @@ class WindowsKit {
         return WindowsKit.parseRegResult(commandProcessResult(
                 "reg", "query", "HKEY_CLASSES_ROOT\\" + progId + "\\shell\\open\\command", "/ve"
         )).values().iterator().next().values().iterator().next();
+    }
+
+    public static void main(String[] args) throws Throwable {
+        DEBUG = true;
+        Map<String, Map<String, String>> result = WindowsKit.parseRegResult(commandProcessResult("reg", "query", "HKEY_CLASSES_ROOT"));
+        System.out.println(result);
     }
 }
