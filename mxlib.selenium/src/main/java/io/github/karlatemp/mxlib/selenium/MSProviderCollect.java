@@ -58,7 +58,7 @@ class MSProviderCollect {
         );
     }
 
-    static SeleniumProvider<?, ?> chromeProvider(File provider, boolean sysDef, String exec, String application) {
+    static SeleniumProvider<?, ?> chromeProvider(File provider, boolean sysDef, String application) {
         return new SimpleSeleniumProvider<>(
                 application,
                 ChromeDriver.class,
@@ -217,7 +217,7 @@ class WinNtMSP extends MSProviderCollect {
                             "chromedriver-" + driverVer + ".zip",
                             FileKit.unzip("chromedriver.exe")
                     );
-                    return chromeProvider(chromedriverExecutable, isSysDefault, null, application);
+                    return chromeProvider(chromedriverExecutable, isSysDefault, application);
                 });
             }
 
@@ -339,7 +339,7 @@ class MacOsMSP extends MSProviderCollect {
                         );
                         return chromeProvider(
                                 chromedriverExecutable,
-                                false, null,
+                                false,
                                 sysApp.getName()
                         );
                     });
