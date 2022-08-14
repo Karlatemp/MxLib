@@ -1,6 +1,6 @@
 # mxlib.nbt
 
-`io.github.karlatemp.mxlib:mxlib-net`
+`io.github.karlatemp.mxlib:mxlib-nbt`
 
 Toolkit for reading/writing MineCraft NBT
 
